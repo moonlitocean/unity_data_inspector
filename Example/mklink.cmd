@@ -1,0 +1,1 @@
+mklink /J Assets\LinkToDataVisualization ..\DataVisualizationmklink /J Assets\LinkToDataVisualization ..\DataVisualization
