@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using FF;
 
@@ -14,7 +12,7 @@ internal class SimpleContentVisualizor : DataVisualizor
 
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
-		List<FieldInfo> fields = new List<FieldInfo>();
+		var fields = new List<FieldInfo>();
 
 		if (visualization.options.simpleContent.showClassStaticFields)
 		{
@@ -24,8 +22,6 @@ internal class SimpleContentVisualizor : DataVisualizor
 		}
 
 		AppendFields(fields, type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-		if (visualization.options.simpleContent.showDataVisualizationFields)
-			AppendAttributedFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy, typeof(FFVisualizationAttribte));
 		if (visualization.options.simpleContent.showNonPublicFields)
 			AppendFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
@@ -52,17 +48,6 @@ internal class SimpleContentVisualizor : DataVisualizor
 		fields.AddRange(type.GetFields(bindingFlags | BindingFlags.DeclaredOnly));
 	}
 
-	private void AppendAttributedFields(List<FieldInfo> fields, Type type, BindingFlags bindingFlags, Type requiredAttribute)
-	{
-		if (type.BaseType != typeof(object))
-		{
-			AppendAttributedFields(fields, type.BaseType, bindingFlags, requiredAttribute);
-		}
-		fields.AddRange(
-			type.GetFields(bindingFlags | BindingFlags.DeclaredOnly)
-				.Where(f => f.GetCustomAttributes(requiredAttribute, false).Length > 0));
-	}
-
 	private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldInfo fieldInfo, string prefix)
 	{
 		object value = fieldInfo.GetValue(data);
@@ -72,7 +57,7 @@ internal class SimpleContentVisualizor : DataVisualizor
 
 		bool changed = false;
 		object changedvalue = null;
-		var mark = TypeUtil.GetAttribute<IEditorMark>(info);
+		var mark = TypeTools.GetAttribute<IEditorMark>(info);
 		if (inwritable)
 			visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
 		else

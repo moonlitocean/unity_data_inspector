@@ -12,7 +12,7 @@ internal class DictionaryVisualizor : DataVisualizor
 
 	public override bool HasContent(object data, Type type)
 	{
-		IDictionary dictionary = data as IDictionary;
+		var dictionary = data as IDictionary;
 		if (dictionary == null)
 			return false;
 
@@ -21,7 +21,7 @@ internal class DictionaryVisualizor : DataVisualizor
 
 	public override bool InspectRoot(string name, ref object data, Type type)
 	{
-		IDictionary dictionary = data as IDictionary;
+		var dictionary = data as IDictionary;
 		if (dictionary == null)
 			return false;
 
@@ -32,14 +32,14 @@ internal class DictionaryVisualizor : DataVisualizor
 
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
-		IDictionary dictionary = data as IDictionary;
+		var dictionary = data as IDictionary;
 		if (dictionary == null)
 			return false;
 
 		Type dictionaryValueType = null;
-		if (TypeUtil.IsSubclassOfDictionary(type))
+		if (TypeTools.IsSubclassOfDictionary(type))
 		{
-			dictionaryValueType = TypeUtil.GetDictionaryValueType(type);
+			dictionaryValueType = TypeTools.GetDictionaryValueType(type);
 		}
 
 		return EditorUIUtils.EditElems(dictionary, EditElem(visualization, path, dictionary, dictionaryValueType), visualization.opened,
@@ -50,7 +50,7 @@ internal class DictionaryVisualizor : DataVisualizor
 	{
 		return (key, value) =>
 		{
-			Type valueType = value != null ? value.GetType() : dictionaryValueType;
+			var valueType = value != null ? value.GetType() : dictionaryValueType;
 			return visualization.Inspect(key.ToString(), path + "." + key, value, valueType, null, v => dictionary[key] = v);
 		};
 	}

@@ -10,7 +10,7 @@ internal class MulticastDelegateVisualizor : DataVisualizor
 
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
-		MulticastDelegate action = data as MulticastDelegate;
+		var action = data as MulticastDelegate;
 		if (action == null)
 			return false;
 
@@ -34,7 +34,7 @@ internal class MulticastDelegateVisualizor : DataVisualizor
 
 	public override bool InspectRoot(string name, ref object data, Type type)
 	{
-		MulticastDelegate action = data as MulticastDelegate;
+		var action = data as MulticastDelegate;
 		if(action!=null)
 		{
 			EditorGUILayout.LabelField("");

@@ -36,8 +36,8 @@ internal class HashSetVisualizor : DataVisualizor
 			return false;
 
 		Type hashsetValueType = null;
-		if (TypeUtil.IsSubclassOfHashSet(type))
-			hashsetValueType = TypeUtil.GetHashSetValueType(type);
+		if (TypeTools.IsSubclassOfHashSet(type))
+			hashsetValueType = TypeTools.GetHashSetValueType(type);
 
 		int i = 0;
 		bool changed = false;

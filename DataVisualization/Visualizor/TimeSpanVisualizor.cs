@@ -12,7 +12,7 @@ internal class TimeSpanVisualizor : DataVisualizor
 
     public override bool InspectRoot(string name, ref object data, Type type)
     {
-        TimeSpan ts = (TimeSpan) data;
+        var ts = (TimeSpan) data;
         int hour = ts.Hours;
         int min = ts.Minutes;
         int sec = ts.Seconds;

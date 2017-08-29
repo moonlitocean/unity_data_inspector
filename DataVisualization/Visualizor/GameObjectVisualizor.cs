@@ -13,7 +13,7 @@ internal class GameObjectVisualizor : DataVisualizor
 
 	public override bool InspectRoot(string name, ref object data, Type type)
 	{
-		Object obj = data as Object;
+		var obj = data as Object;
 		if (obj != null)
 		{
 			EditorGUILayout.LabelField(string.Format("{0}[{1}]", obj.name, data.GetType().Name));
@@ -33,7 +33,7 @@ internal class GameObjectVisualizor : DataVisualizor
 
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
-		GameObject go = data as GameObject;
+		var go = data as GameObject;
 
 		bool changed = false;
 		foreach (Component comp in go.GetComponents<Component>())

@@ -6,7 +6,8 @@ using UnityEngine;
 
 internal class DateTimeVisualizor : DataVisualizor
 {
-	private readonly CultureInfo culture = new CultureInfo("en-US");
+	private readonly static DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Local);
+	private readonly static CultureInfo culture = new CultureInfo("en-US");
 
 	public override bool IsFoldable()
 	{
@@ -41,12 +42,7 @@ internal class DateTimeVisualizor : DataVisualizor
 			time = Add(time, -60);
 
 		if (GUILayout.Button("Now", GUILayout.Width(50)))
-		{
-			if (TimeMan.Instance != null)
-				time = TimeMan.Instance.ServerUtcDateTime();
-			else
-				time = DateTime.Now;
-		}
+			time = DateTime.Now;
 
 		return ApplyData(ref data, ToReturnType(time, type));
 	}
@@ -55,7 +51,7 @@ internal class DateTimeVisualizor : DataVisualizor
 	{
 		if (type == typeof(long))
 		{
-			return TimeUtil.DateToCTime(time);
+			return DateToCTime(time);
 		}
 		else
 		{
@@ -66,7 +62,7 @@ internal class DateTimeVisualizor : DataVisualizor
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
 		DateTime time = ToTime(data, type);
-		long oldctime = (long)TimeUtil.DateToCTime(time);
+		long oldctime = (long)DateToCTime(time);
 		visualization.Inspect("ctime", path + ".ctime", oldctime, typeof (long), null, newtime =>
 		{
 			time = ParseLongDateTime((long)newtime, time);
@@ -78,7 +74,7 @@ internal class DateTimeVisualizor : DataVisualizor
 	{
 		DateTime time;
 		if (type == typeof(long))
-			time = TimeUtil.CTimeToDate((long)data);
+			time = CTimeToDate((long)data);
 		else
 			time = (DateTime)data;
 		return time;
@@ -106,11 +102,44 @@ internal class DateTimeVisualizor : DataVisualizor
 	{
 		try
 		{
-			return TimeUtil.CTimeToDate(ctime);
+			return CTimeToDate(ctime);
 		}
 		catch (Exception)
 		{
 			return defaultValue;
 		}
+	}
+
+	public static long DateToCTime(DateTime time)
+	{
+		if (time.Ticks == 0)
+			return 0L;
+
+		var ts = time.Subtract(CTIME_BEGIN);
+		var ctime = (long)ts.TotalSeconds;
+
+		if (ctime < 0L)
+		{
+			ctime = 0L;
+		}
+
+		return ctime;
+	}
+
+	// 从C标准库的时间，即自1970年1月1日起的秒数，转 DateTime。
+	// 其中0为特殊值
+	public static DateTime CTimeToDate(long time)
+	{
+		if (time == 0L)
+		{
+			return new DateTime();
+		}
+
+		if (time < 0L)
+		{
+			time = 0L;
+		}
+
+		return CTIME_BEGIN + new TimeSpan(time * TimeSpan.TicksPerSecond);
 	}
 }

@@ -14,7 +14,7 @@ internal class EnumVisualizor : DataVisualizor
         Enum e = data as Enum;
         if (e == null)
             return false;
-        if (TypeUtil.GetAttribute<FlagsAttribute>(type) != null)
+        if (TypeTools.GetAttribute<FlagsAttribute>(type) != null)
         {
             return ApplyData(ref data, EditorGUILayout.EnumMaskField(name, e));
         }

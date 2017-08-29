@@ -28,10 +28,10 @@ internal class ListVisualizor : DataVisualizor
 			return false;
 
 		int newCount;
-		using (GUITools.LayoutHorizontal())
+		using (new EditorGUILayout.HorizontalScope())
 		{
 			EditorGUILayout.LabelField("Size:", GUILayout.Width(70));
-			newCount = FFGUILayout.DelayedIntField(list.Count);
+			newCount = GUITools.DelayedIntField(list.Count);
 		}
 		newCount = Math.Max(0, newCount);
 		if (newCount != list.Count)
@@ -49,8 +49,8 @@ internal class ListVisualizor : DataVisualizor
 			return false;
 
 		Type listValueType = null;
-		if (TypeUtil.IsSubclassOfList(type))
-			listValueType = TypeUtil.GetListValueType(type);
+		if (TypeTools.IsSubclassOfList(type))
+			listValueType = TypeTools.GetListValueType(type);
 
 		bool changed = false;
 		for (int index = 0; index < list.Count; ++index)
@@ -70,14 +70,14 @@ internal class ListVisualizor : DataVisualizor
 
 	private IList ResizeList(IList list, int newCount)
 	{
-		if (TypeUtil.IsSubclassOfList(list.GetType()))
+		if (TypeTools.IsSubclassOfList(list.GetType()))
 		{
-			TypeUtil.ResizeGenericList(list, newCount);
+			TypeTools.ResizeGenericList(list, newCount);
 			return list;
 		}
 		else if (list.GetType().IsArray)
 		{
-			return TypeUtil.ResizeArray(list as Array, newCount);
+			return TypeTools.ResizeArray(list as Array, newCount);
 		}
 		else
 		{

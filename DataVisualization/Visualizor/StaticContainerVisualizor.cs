@@ -25,7 +25,7 @@ internal class StaticContainerVisualizor : DataVisualizor
 				data[i] = new FieldData
 				{
 					field = fieldInfos[i],
-					mark = TypeUtil.GetAttribute<IEditorMark>(fieldInfos[i])
+					mark = TypeTools.GetAttribute<IEditorMark>(fieldInfos[i])
 				};
 			}
 			cachedFields.Add(type, data);
@@ -40,7 +40,7 @@ internal class StaticContainerVisualizor : DataVisualizor
 
 	public override bool InspectContent(DataVisualization visualization, string path, ref object data, Type type)
 	{
-		Type dataAsType = data as Type;
+		var dataAsType = data as Type;
 		if (dataAsType == null)
 			return false;
 
