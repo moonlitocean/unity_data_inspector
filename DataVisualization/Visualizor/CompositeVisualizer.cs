@@ -41,7 +41,7 @@ internal class CompositeVisualizer : DataVisualizer
 	// 添加相关Fields。但是特别的是，基类的属性在派生类之前
 	private static void AppendFields(List<FieldInfo> fields, Type type, BindingFlags bindingFlags)
 	{
-		if (type.BaseType != typeof(object))
+		if (type.BaseType != typeof(object) && type != typeof(object))
 		{
 			AppendFields(fields, type.BaseType, bindingFlags);
 		}

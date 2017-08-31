@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 internal class UnityObjectVisualizer : DataVisualizer
@@ -14,15 +15,25 @@ internal class UnityObjectVisualizer : DataVisualizer
 	{
 		var obj = data as Object;
 		if (obj != null)
-		{
-			EditorGUILayout.ObjectField(string.Format("{0}[{1}]", obj.name, data.GetType().Name), obj, obj.GetType(), true, null);
-		}
-		return false;
+			obj = EditorGUILayout.ObjectField(obj, type, true, null);
+		else
+			obj = EditorGUILayout.ObjectField(null, type, true, null);
+
+		return ApplyValueIfNotEqual(ref data, obj);
 	}
 
 	public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
 	{
 		bool changed = false;
+		var go = data as GameObject;
+		if (go != null)
+		{
+			foreach (Component comp in go.GetComponents<Component>())
+			{
+				changed |= visualization.Inspect(comp.GetType().Name, path + "." + comp.GetType().Name, comp);
+			}
+		}
+
 		foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
 		{
 			changed |= InspectField(visualization, path, ref data, fieldInfo);
@@ -59,7 +70,7 @@ internal class UnityObjectVisualizer : DataVisualizer
 
 	private static bool InspectProperty(DataVisualization visualization, string path, ref object data, PropertyInfo propertyInfo)
 	{
-		if (propertyInfo.CanRead)
+		if (propertyInfo.CanRead && CanInspect(propertyInfo))
 		{
 			object value;
 			try
@@ -75,7 +86,18 @@ internal class UnityObjectVisualizer : DataVisualizer
 		}
 		else
 		{
-			return visualization.Inspect(propertyInfo.Name, path + "." + propertyInfo.Name, "unreadable");
+			EditorGUILayout.LabelField(propertyInfo.Name, "unreadable");
+			return false;
 		}
+	}
+
+	private static bool CanInspect(PropertyInfo p)
+	{
+		if (p == null)
+			return false;
+		var attrs = p.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+		if (attrs.Length == 0)
+			return true;
+		return false;
 	}
 }

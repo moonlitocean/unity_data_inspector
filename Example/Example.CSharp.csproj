@@ -82,7 +82,6 @@
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\DateTimeVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\DictionaryVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\EnumVisualizer.cs" />
-    <Compile Include="Assets\LinkToDataVisualization\Visualizor\GameObjectVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\HashSetVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\ListArrayVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\MulticastDelegateVisualizer.cs" />

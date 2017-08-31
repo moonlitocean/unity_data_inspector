@@ -42,7 +42,7 @@ public class DataVisualization
 	    finelTypeVisualizor.Add(typeof(TimeSpan), GetVisualizer(typeof(TimeSpanVisualizer)));
 
 	    // UnityEngine类型，不使用编辑器原生逻辑，特殊处理
-	    finelTypeVisualizor.Add(typeof(GameObject), GetVisualizer(typeof(GameObjectVisualizer)));
+	    // finelTypeVisualizor.Add(typeof(GameObject), GetVisualizer(typeof(GameObjectVisualizer)));
 
 	    // UnityEngine类型，直接使用Unity编辑器原生逻辑，由 UnityTypeVisualizer 统一处理的系列
 	    finelTypeVisualizor.Add(typeof(Color), GetVisualizer(typeof(UnityTypeVisualizer)));
@@ -89,7 +89,7 @@ public class DataVisualization
 		if(type == null)
 			type = data != null ? data.GetType() : null;
 
-		DataVisualizer visualizer = GetDataVisualizor(data, type, mark);
+		DataVisualizer visualizer = GetDataVisualizor(type, mark);
 		bool changed = false;
 		object changedData = data;
 		if (visualizer != null)
@@ -183,9 +183,9 @@ public class DataVisualization
 		}
 	}
 
-	private DataVisualizer GetDataVisualizor(object data, Type type, IMark mark)
+	private DataVisualizer GetDataVisualizor(Type type, IMark mark)
 	{
-		if (mark == null && data == null)
+		if (mark == null && type == null)
 			return atomVisualizer;
 
 		DataVisualizer v;
