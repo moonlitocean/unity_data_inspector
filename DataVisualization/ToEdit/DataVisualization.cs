@@ -83,7 +83,7 @@ public class DataVisualization
 
 	public bool Inspect(string name, string path, object data,
 		Type type = null, 
-		IEditorMark mark = null,
+		IMark mark = null,
 		Action<object> OnValueChanged = null)
 	{
 		if(type == null)
@@ -127,7 +127,7 @@ public class DataVisualization
 	}
 
 
-	private static bool InspectRoot(string name, Type type, ref object data, DataVisualizer visualizer, IEditorMark mark)
+	private static bool InspectRoot(string name, Type type, ref object data, DataVisualizer visualizer, IMark mark)
 	{
 		using (new EditorGUILayout.HorizontalScope())
 		{
@@ -156,7 +156,7 @@ public class DataVisualization
 		}
 	}
 
-	private static object CreateClassInstance(Type type, DataVisualizer visualizer, IEditorMark mark)
+	private static object CreateClassInstance(Type type, DataVisualizer visualizer, IMark mark)
 	{
 		if (visualizer.HasCustomCreator(mark))
 			return visualizer.CustomCreateInstance(mark);
@@ -183,7 +183,7 @@ public class DataVisualization
 		}
 	}
 
-	private DataVisualizer GetDataVisualizor(object data, Type type, IEditorMark mark)
+	private DataVisualizer GetDataVisualizor(object data, Type type, IMark mark)
 	{
 		if (mark == null && data == null)
 			return atomVisualizer;
@@ -197,14 +197,14 @@ public class DataVisualization
 		return v;
 	}
 
-	private DataVisualizer FindVisualizor(Type type, IEditorMark mark)
+	private DataVisualizer FindVisualizor(Type type, IMark mark)
 	{
 		if (type == null && mark == null)
 			throw new NullReferenceException("There must be at least one argument that is not null");
 
 		if (mark != null)
 		{
-			if (mark is CTimeAttribute)
+			if (mark is UnixTimestampAttribute)
 				return GetVisualizer(typeof (DateTimeVisualizer));
 
 			//if (mark is LocaleAttribute)

@@ -15,8 +15,8 @@ internal class EnumVisualizer : DataVisualizer
         if (e == null)
             return false;
         if (TypeTools.GetAttribute<FlagsAttribute>(type) != null)
-            return ApplyValueTypeData(ref data, EditorGUILayout.EnumMaskField(name, e));
+            return ApplyValueIfNotEqual(ref data, EditorGUILayout.EnumMaskField(name, e));
         else
-	        return ApplyValueTypeData(ref data, EditorGUILayout.EnumPopup(name, e));
+	        return ApplyValueIfNotEqual(ref data, EditorGUILayout.EnumPopup(name, e));
     }
 }

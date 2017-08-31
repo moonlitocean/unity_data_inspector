@@ -57,7 +57,7 @@ internal class CompositeVisualizer : DataVisualizer
 
 		bool changed = false;
 		object changedvalue = null;
-		var mark = TypeTools.GetAttribute<IEditorMark>(info);
+		var mark = TypeTools.GetAttribute<IMark>(info);
 		if (inwritable)
 			visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
 		else

@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEditor;
-using UnityEngine;
 
 internal class TimeSpanVisualizer : DataVisualizer
 {
@@ -11,23 +10,25 @@ internal class TimeSpanVisualizer : DataVisualizer
 
     public override bool InspectSelf(string name, ref object data, Type type)
     {
-        var ts = (TimeSpan) data;
-        int hour = ts.Hours;
-        int min = ts.Minutes;
-        int sec = ts.Seconds;
-        EditorGUILayout.BeginHorizontal();
-        GUILayout.Label(name);
-        GUILayout.FlexibleSpace();
-        int nh = EditorGUILayout.IntField(hour);
-        GUILayout.Label(":");
-        int nm = EditorGUILayout.IntField(min);
-        GUILayout.Label(":");
-        int ns = EditorGUILayout.IntField(sec);
-        EditorGUILayout.EndHorizontal();
-        if (nh != hour || nm != min || ns != sec)
-        {
-            return ApplyValueTypeData(ref data, new TimeSpan(nh, nm, ns));
-        }
-	    return false;
+		var span = (TimeSpan)data;
+
+		string oldstrdate = span.ToString();
+		string str = EditorGUILayout.TextField(name, oldstrdate);
+		if (oldstrdate != str)
+			span = ParseTimeSpan(str, span);
+
+		return ApplyValueIfNotEqual(ref data, span);
     }
+
+	private TimeSpan ParseTimeSpan(string str, TimeSpan defaultValue)
+	{
+		try
+		{
+			return TimeSpan.Parse(str);
+		}
+		catch (Exception)
+		{
+			return defaultValue;
+		}
+	}
 }

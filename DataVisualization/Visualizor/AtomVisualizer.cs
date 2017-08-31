@@ -79,7 +79,7 @@ internal class AtomVisualizer : DataVisualizer
 			throw new NotImplementedException(type.Name);
 		}
 
-		return ApplyValueTypeData(ref data, result);
+		return ApplyValueIfNotEqual(ref data, result);
 	}
 
 	private long ParseLong(string text, long defaultLong)

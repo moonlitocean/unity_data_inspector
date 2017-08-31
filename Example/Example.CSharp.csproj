@@ -70,14 +70,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\LinkToDataVisualization\Attributes\CTimeAttribute.cs" />
-    <Compile Include="Assets\LinkToDataVisualization\Attributes\IEditorMark.cs" />
+    <Compile Include="Assets\LinkToDataVisualization\Attributes\UnixTimestampAttribute.cs" />
+    <Compile Include="Assets\LinkToDataVisualization\Attributes\IMark.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Common\EditorUIUtils.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Common\GUITools.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Common\TypeTools.cs" />
     <Compile Include="Assets\LinkToDataVisualization\DataVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\ToEdit\DataVisualization.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\AtomVisualizer.cs" />
+    <Compile Include="Assets\LinkToDataVisualization\Visualizor\CompositeVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\DateTimeVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\DictionaryVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\EnumVisualizer.cs" />
@@ -85,12 +86,11 @@
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\HashSetVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\ListArrayVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\MulticastDelegateVisualizer.cs" />
-    <Compile Include="Assets\LinkToDataVisualization\Visualizor\CompositeVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\StaticVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\TimeSpanVisualizer.cs" />
-    <Compile Include="Assets\LinkToDataVisualization\Visualizor\UnityTypeVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\UnityObjectVisualizer.cs" />
-    <Compile Include="Assets\Test1.cs" />
+    <Compile Include="Assets\LinkToDataVisualization\Visualizor\UnityTypeVisualizer.cs" />
+    <Compile Include="Assets\Test.cs" />
     <Compile Include="Assets\Watch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />

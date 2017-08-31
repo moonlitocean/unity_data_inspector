@@ -9,7 +9,7 @@ internal class StaticVisualizer : DataVisualizer
 	private class FieldData
 	{
 		public FieldInfo field;
-		public IEditorMark mark;
+		public IMark mark;
 	}
 	private static readonly Dictionary<Type, FieldData[]> cachedFields = new Dictionary<Type, FieldData[]>();
 
@@ -25,7 +25,7 @@ internal class StaticVisualizer : DataVisualizer
 				data[i] = new FieldData
 				{
 					field = fieldInfos[i],
-					mark = TypeTools.GetAttribute<IEditorMark>(fieldInfos[i])
+					mark = TypeTools.GetAttribute<IMark>(fieldInfos[i])
 				};
 			}
 			cachedFields.Add(type, data);

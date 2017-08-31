@@ -4,7 +4,7 @@ using FF;
 public abstract class DataVisualizer
 {
 	// 是否使用了自定义了构造器。如果返回true，则需要实现 CustomCreateInstance
-	public virtual bool HasCustomCreator(IEditorMark mark)
+	public virtual bool HasCustomCreator(IMark mark)
 	{
 		return false;
 	}
@@ -41,7 +41,7 @@ public abstract class DataVisualizer
 		return false;
 	}
 
-	public virtual object CustomCreateInstance(IEditorMark mark)
+	public virtual object CustomCreateInstance(IMark mark)
 	{
 		throw new NotImplementedException();
 	}
@@ -49,8 +49,13 @@ public abstract class DataVisualizer
 	// 将data改为income。
 	//
 	// data必须与income同类型，并且是valueType，否则行为是未定义的。
-	// 如果data被修改（使用Equals判断），则返回true。
-	protected bool ApplyValueTypeData(ref object data, object income)
+	// 如果使用 Equals 判断 data 与 income 不相同，则使用 income 覆盖 data
+	// 否则保持data不变。
+	// 
+	// 返回： 是否发生了覆盖操作
+	//
+	// 注意： 若子字段修改不改变 Equals，则本函数不产生效果。例如 DateTime.Kind 不会影响equality。
+	protected bool ApplyValueIfNotEqual(ref object data, object income)
 	{
 		if (data == null)
 		{
