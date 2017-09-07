@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FF
+namespace DataTools
 {
 	public class UnixTimestampAttribute : Attribute, IMark{}
 }

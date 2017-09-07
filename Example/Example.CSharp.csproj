@@ -89,7 +89,7 @@
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\TimeSpanVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\UnityObjectVisualizer.cs" />
     <Compile Include="Assets\LinkToDataVisualization\Visualizor\UnityTypeVisualizer.cs" />
-    <Compile Include="Assets\Test.cs" />
+    <Compile Include="Assets\TestClass.cs" />
     <Compile Include="Assets\Watch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />

@@ -1,4 +1,4 @@
-﻿namespace FF
+﻿namespace DataTools
 {
 	public interface IMark{}
 }
