@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using DataTools;
 using UnityEngine;
 
+#pragma warning disable 414
+
 public class TestClass
 {
 	public class Base
