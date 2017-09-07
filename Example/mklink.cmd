@@ -1,2 +1,2 @@
-mklink /J Assets\LinkToDataVisualization ..\DataVisualization
-pause
+@mklink /J Assets\LinkToDataVisualization ..\DataVisualization
+@pause
