@@ -1,3 +1,9 @@
 /Example/Library
 /Example/Assets/LinkToDataVisualization
 /Example/Temp
+*.meta
+/Example/Example.CSharp.csproj
+/Example/Example.CSharp.csproj.user
+/Example/Example.sln
+/Example/Example.sln.DotSettings.user
+/Example/Example.v12.suo
