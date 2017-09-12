@@ -10,7 +10,7 @@ public class DataVisualizationOptions
 {
 	public class CompositeOption
 	{
-		public bool showNonPublicFields;
+        public bool showNonPublicFields;
 		public bool showStaticFields;
 		public bool sortFields;
 	}
@@ -134,7 +134,8 @@ public class DataVisualization
 			bool changed = visualizer.InspectSelf(name, ref data, type);
 			if (type != null && type.IsClass)
 			{
-				GUILayout.FlexibleSpace();
+                if(!(data is string))
+				    GUILayout.FlexibleSpace();
 				if (data != null)
 				{
 					if (GUILayout.Button("-", GUILayout.Width(20)))
