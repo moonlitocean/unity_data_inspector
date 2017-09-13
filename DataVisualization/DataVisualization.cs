@@ -36,43 +36,7 @@ public class DataVisualization
 
     public DataVisualization()
     {
-		/////////////////////////////////////////////////////////////////////////
-		// 注册三个基本visualizer
-		primitiveVisualizer = new PrimitiveVisualizer();
-	    compositeVisualizer = new CompositeVisualizer();
-	    enumVisualizer = new EnumVisualizer();
-
-		/////////////////////////////////////////////////////////////////////////
-		// 注册 type --> visualize 的映射。
-		// 支持继承、接口、完全无绑定的泛型基类和完全绑定的泛型基类。不支持部分绑定的泛型基类
-		// 特殊规则
-	    rules.Add(typeof (Type), new StaticVisualizer());
-
-		// C# 基本类型
-		rules.Add(typeof(string), new StringVisualizer());
-		rules.Add(typeof(MulticastDelegate), new MulticastDelegateVisualizer());
-		rules.Add(typeof(DateTime), new DateTimeVisualizer());
-		rules.Add(typeof(TimeSpan), new TimeSpanVisualizer());
-
-		// C# 容器类型
-		rules.Add(typeof(IList), new ListVisualizer());
-		rules.Add(typeof(IDictionary), new DictionaryVisualizer());
-		rules.Add(typeof(HashSet<>), new HashSetVisualizer());
-
-	    // UnityEngine类型，直接使用Unity编辑器原生逻辑，由 UnityTypeVisualizer 统一处理的系列
-		rules.Add(typeof(UnityEngine.Object), new UnityObjectVisualizer());
-
-	    var unityTypeVisualizer = new UnityTypeVisualizer();
-		rules.Add(typeof(Color), unityTypeVisualizer);
-		rules.Add(typeof(Vector2), unityTypeVisualizer);
-		rules.Add(typeof(Vector3), unityTypeVisualizer);
-		rules.Add(typeof(Vector4), unityTypeVisualizer);
-		rules.Add(typeof(Bounds), unityTypeVisualizer);
-		rules.Add(typeof(Rect), unityTypeVisualizer);
-		rules.Add(typeof(AnimationCurve), unityTypeVisualizer);
-
-		// Marker
-	    markRules.Add(typeof (UnixTimestampAttribute), rules[typeof (DateTime)]);
+	    RegisterDefaultVisualizers();
 	    // SetVisualizer(typeof(LocaleAttribute), GetVisualizer(typeof(LocaleStringVisualizor)));
 
 	    // 基础数学类型，自定义的FF系列，BB系列
@@ -93,6 +57,46 @@ public class DataVisualization
 	    //rules.Add(typeof(RangeAttributeVariable_long), GetVisualizer(typeof(RangeAttributeVariable_longVisualizor)));
 	    //rules.Add(typeof(RangeAttributeVariable_float), GetVisualizer(typeof(RangeAttributeVariable_floatVisualizor)));
     }
+
+	private void RegisterDefaultVisualizers()
+	{
+		/////////////////////////////////////////////////////////////////////////
+		// Register three core visualizer
+		primitiveVisualizer = new PrimitiveVisualizer();
+		compositeVisualizer = new CompositeVisualizer();
+		enumVisualizer = new EnumVisualizer();
+
+		// static visualizers
+		rules.Add(typeof (Type), new StaticVisualizer());
+
+		/////////////////////////////////////////////////////////////////////////
+		// type --> visualize
+		// C# basic types
+		rules.Add(typeof (string), new StringVisualizer());
+		rules.Add(typeof (MulticastDelegate), new MulticastDelegateVisualizer());
+		rules.Add(typeof (DateTime), new DateTimeVisualizer());
+		rules.Add(typeof (TimeSpan), new TimeSpanVisualizer());
+
+		// C# containers
+		rules.Add(typeof (IList), new ListVisualizer());
+		rules.Add(typeof (IDictionary), new DictionaryVisualizer());
+		rules.Add(typeof (HashSet<>), new HashSetVisualizer());
+		
+		// UnityEngine types
+		rules.Add(typeof (UnityEngine.Object), new UnityObjectVisualizer());
+
+		var unityTypeVisualizer = new UnityTypeVisualizer();
+		rules.Add(typeof (Color), unityTypeVisualizer);
+		rules.Add(typeof (Vector2), unityTypeVisualizer);
+		rules.Add(typeof (Vector3), unityTypeVisualizer);
+		rules.Add(typeof (Vector4), unityTypeVisualizer);
+		rules.Add(typeof (Bounds), unityTypeVisualizer);
+		rules.Add(typeof (Rect), unityTypeVisualizer);
+		rules.Add(typeof (AnimationCurve), unityTypeVisualizer);
+
+		// Markers
+		markRules.Add(typeof (UnixTimestampAttribute), rules[typeof (DateTime)]);
+	}
 
 	public void RemoveVisualizer(Type type)
 	{

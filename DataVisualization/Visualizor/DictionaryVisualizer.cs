@@ -29,9 +29,7 @@ internal class DictionaryVisualizer : DataVisualizer
 
 		Type dictionaryValueType = null;
 		if (TypeTools.IsSubclassOfDictionary(type))
-		{
 			dictionaryValueType = TypeTools.GetDictionaryValueType(type);
-		}
 
 		return EditorUIUtils.EditElems(dictionary, EditElem(visualization, path, dictionary, dictionaryValueType), visualization.isFoldout,
 			path + "[fold]");

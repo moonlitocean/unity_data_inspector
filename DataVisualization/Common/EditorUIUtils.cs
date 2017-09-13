@@ -78,7 +78,7 @@ public static class EditorUIUtils
 
 		if (state.searchResult != null)
 		{
-			EditorGUILayout.LabelField(string.Format("{0}个结果：", state.searchResult.sorted.Length));
+			EditorGUILayout.LabelField(string.Format("{0} Errors：", state.searchResult.sorted.Length));
 			return ShowGrouped(state.data, EditItem, foldout, foldoutRoot, state.searchResult);
 		}
 		else
@@ -98,7 +98,7 @@ public static class EditorUIUtils
 		using (GUITools.Indent())
 		using (new EditorGUILayout.HorizontalScope("box"))
 		{
-			var newInput = EditorGUILayout.TextField("搜索: ", input.text);
+			var newInput = EditorGUILayout.TextField("Search: ", input.text);
 			if (newInput != input.text)
 			{
 				input.text = newInput;
@@ -248,7 +248,7 @@ public static class EditorUIUtils
 
 	private static object[] GetKeys(IDictionary dict)
 	{
-		object[] keys = new object[dict.Count];
+		var keys = new object[dict.Count];
 		int index = 0;
 		foreach (object key in dict.Keys)
 		{
@@ -271,7 +271,7 @@ public static class EditorUIUtils
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
-	// ui上文字展示规则
+	// ui key rules
 	private static string[] BuildGroupTitles(IDictionary dict, object[] sorted)
 	{
 		string[] result = new string[(sorted.Length - 1) / GroupElemsCount + 1];
@@ -319,8 +319,6 @@ public static class EditorUIUtils
 		return result;
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////
-	// ui上文字展示规则
 	private static string FormatKeyRange(IDictionary dict, object begin, object end)
 	{
 		if (IsPrintable(dict[begin]) && IsPrintable(dict[end]))
