@@ -14,7 +14,7 @@ Click Window/Watch menu to open the example window.
 ## Inpect data
 
 ```c#
-private Inspector ins;
+private Inspector ins = new Inspector();
 ins.Inspect(string name, string path, object data)
 ```
 
@@ -34,7 +34,7 @@ ins.SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 ```
 Supports generic type and inheritance.  
 
-## Use IMarkAttribute to provide different views 
+## Define IMarkAttribute to provide different views 
 
 To mark some int as timestamp, or mark some string as Locale (that can translates from "skill.101.name" to  "Rocket Punch").
 
