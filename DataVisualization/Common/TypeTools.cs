@@ -59,7 +59,7 @@ namespace DataTools
 		{
 			for (Type ancestor = type; ancestor != null; ancestor = BaseType(ancestor))
 			{
-				if (IsGenericType(ancestor) && ancestor.GetGenericTypeDefinition() == wantedType)
+				if (ancestor.IsGenericType && ancestor.GetGenericTypeDefinition() == wantedType)
 					return ancestor;
 			}
 			return null;
@@ -122,11 +122,6 @@ namespace DataTools
 			where T : class
 		{
 			return info.GetCustomAttributes(typeof(T), false).OfType<T>().FirstOrDefault();
-		}
-
-		public static bool IsGenericType(Type type)
-		{
-			return type.IsGenericType;
 		}
 
 		public static Type BaseType(Type type)

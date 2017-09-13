@@ -9,7 +9,7 @@ internal class UnityTypeVisualizer : DataVisualizer
 		return false;
 	}
 
-	public override bool InspectSelf(string name, ref object data, Type type)
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		if (data is Color)
 		{

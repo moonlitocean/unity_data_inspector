@@ -11,7 +11,7 @@ internal class UnityObjectVisualizer : DataVisualizer
 		return true;
 	}
 
-	public override bool InspectSelf(string name, ref object data, Type type)
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		var obj = data as Object;
 		if (obj != null)

@@ -4,7 +4,7 @@ using DataTools;
 public abstract class DataVisualizer
 {
 	// 是否使用了自定义了构造器。如果返回true，则需要实现 CustomCreateInstance
-	public virtual bool HasCustomCreator(IMark mark)
+	public virtual bool HasCustomCreator(Type type, IMark mark)
 	{
 		return false;
 	}
@@ -13,7 +13,7 @@ public abstract class DataVisualizer
 	// 
 	// GUI上下文：水平排列，其左侧会是自己的名称，当自己为引用类型时右侧会有一个+/-按钮。
 	// 建议只产生一个 GUI 控件，这样可以维持一行两列的整齐排布
-	public virtual bool InspectSelf(string name, ref object data, Type type)
+	public virtual bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		return false;
 	}
@@ -41,7 +41,7 @@ public abstract class DataVisualizer
 		return false;
 	}
 
-	public virtual object CustomCreateInstance(IMark mark)
+	public virtual object CustomCreateInstance(Type type, IMark mark)
 	{
 		throw new NotImplementedException();
 	}

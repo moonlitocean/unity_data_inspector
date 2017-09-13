@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEditor;
 
-internal class AtomVisualizer : DataVisualizer
+internal class PrimitiveVisualizer : DataVisualizer
 {
-	//Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single.
-	public override bool InspectSelf(string name, ref object data, Type type)
+	// Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single.
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		object result;
-		EditorGUIUtility.labelWidth = DataVisualization.LabelWidth;
+		EditorGUIUtility.labelWidth = visualization.options.labelWidth;
 		if (data == null)
 		{
 			EditorGUILayout.LabelField(name, "null");
@@ -69,10 +69,6 @@ internal class AtomVisualizer : DataVisualizer
 		else if (data is double)
 		{
 			result = EditorGUILayout.DoubleField(name, (double) data);
-		}
-		else if (data is string)
-		{
-			result = EditorGUILayout.TextField(name, (string) data);
 		}
 		else
 		{

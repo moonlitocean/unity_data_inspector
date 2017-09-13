@@ -14,21 +14,19 @@ internal class CompositeVisualizer : DataVisualizer
 	{
 		var fields = new List<FieldInfo>();
 
-		if (visualization.options.composite.showStaticFields)
+		if (visualization.options.showStaticFields)
 		{
 			AppendFields(fields, type, BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-			if (visualization.options.composite.showNonPublicFields)
+			if (visualization.options.showNonPublicFields)
 				AppendFields(fields, type, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 		}
 
 		AppendFields(fields, type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-		if (visualization.options.composite.showNonPublicFields)
+		if (visualization.options.showNonPublicFields)
 			AppendFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-		if (visualization.options.composite.sortFields)
-		{
+		if (visualization.options.sortFields)
 			fields.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-		}
 
 		bool changed = false;
 		foreach (var fieldInfo in fields)

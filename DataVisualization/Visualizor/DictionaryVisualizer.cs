@@ -10,13 +10,13 @@ internal class DictionaryVisualizer : DataVisualizer
 		return true;
 	}
 
-	public override bool InspectSelf(string name, ref object data, Type type)
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		var dictionary = data as IDictionary;
 		if (dictionary == null)
 			return false;
 
-		EditorGUIUtility.labelWidth = DataVisualization.LabelWidth;
+		EditorGUIUtility.labelWidth = visualization.options.labelWidth;
 		EditorGUILayout.LabelField("Count: " + dictionary.Count);
 		return false;
 	}
@@ -33,7 +33,7 @@ internal class DictionaryVisualizer : DataVisualizer
 			dictionaryValueType = TypeTools.GetDictionaryValueType(type);
 		}
 
-		return EditorUIUtils.EditElems(dictionary, EditElem(visualization, path, dictionary, dictionaryValueType), visualization.opened,
+		return EditorUIUtils.EditElems(dictionary, EditElem(visualization, path, dictionary, dictionaryValueType), visualization.isFoldout,
 			path + "[fold]");
 	}
 

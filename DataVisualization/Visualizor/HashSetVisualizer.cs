@@ -10,7 +10,7 @@ internal class HashSetVisualizer : DataVisualizer
 		return true;
 	}
 
-	public override bool InspectSelf(string name, ref object data, Type type)
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		var container = data as IEnumerable;
 		if (container == null)

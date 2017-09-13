@@ -5,12 +5,25 @@ using UnityEditor;
 
 internal class ListVisualizer : DataVisualizer
 {
+	public override bool HasCustomCreator(Type type, IMark mark)
+	{
+		return type.IsArray;
+	}
+
+	public override object CustomCreateInstance(Type type, IMark mark)
+	{
+		if (type.IsArray)
+			return Array.CreateInstance(type.GetElementType(), new int[type.GetArrayRank()]);
+
+		throw new NotImplementedException(type.ToString());
+	}
+
 	public override bool HasChildren()
 	{
 		return true;
 	}
 
-	public override bool InspectSelf(string name, ref object data, Type type)
+	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		var list = data as IList;
 		if (list == null)
@@ -51,7 +64,7 @@ internal class ListVisualizer : DataVisualizer
 		return changed;
 	}
 
-	protected IList Resize(IList list, int newCount, Type elemType)
+	private IList Resize(IList list, int newCount, Type elemType)
 	{
 		if (list.GetType().IsArray)
 		{
@@ -71,7 +84,7 @@ internal class ListVisualizer : DataVisualizer
 		}
 	}
 
-	protected virtual Type GetElemType(IList list)
+	private Type GetElemType(IList list)
 	{
 		var t = list.GetType();
 		if (t.IsArray)
