@@ -1,16 +1,16 @@
 ﻿using System;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class EnumVisualizer : DataVisualizer
+	internal class EnumVisualizer : VisualizerBase
 	{
 		public override bool HasChildren()
 		{
 			return false;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			var e = data as Enum;
 			if (e == null)

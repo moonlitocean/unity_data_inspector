@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class StaticVisualizer : DataVisualizer
+	internal class StaticVisualizer : VisualizerBase
 	{
 		private class FieldData
 		{
@@ -40,7 +40,7 @@ namespace DataTools
 			return true;
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var dataAsType = data as Type;
 			if (dataAsType == null)
@@ -49,16 +49,16 @@ namespace DataTools
 			bool changed = false;
 			foreach (FieldData field in GetFieldInfos(dataAsType))
 			{
-				changed |= InspectField(visualization, path + "." + field.field.Name, ref data, field);
+				changed |= InspectField(inspector, path + "." + field.field.Name, ref data, field);
 			}
 			return changed;
 		}
 
-		private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldData fieldInfo)
+		private static bool InspectField(Inspector inspector, string path, ref object data, FieldData fieldInfo)
 		{
 			bool changed = false;
 			object newValue = null;
-			visualization.Inspect(fieldInfo.field.Name, path, fieldInfo.field.GetValue(null), fieldInfo.field.FieldType,
+			inspector.Inspect(fieldInfo.field.Name, path, fieldInfo.field.GetValue(null), fieldInfo.field.FieldType,
 				fieldInfo.mark, v =>
 				{
 					changed = true;

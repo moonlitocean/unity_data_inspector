@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace DataTools
+namespace DataInspector
 {
 	internal static class TypeTools
 	{

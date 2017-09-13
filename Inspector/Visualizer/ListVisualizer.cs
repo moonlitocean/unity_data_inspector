@@ -2,9 +2,9 @@
 using System.Collections;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class ListVisualizer : DataVisualizer
+	internal class ListVisualizer : VisualizerBase
 	{
 		public override bool HasCustomCreator(Type type, IMark mark)
 		{
@@ -24,7 +24,7 @@ namespace DataTools
 			return true;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			var list = data as IList;
 			if (list == null)
@@ -34,7 +34,7 @@ namespace DataTools
 			return false;
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var list = data as IList;
 			if (list == null)
@@ -60,7 +60,7 @@ namespace DataTools
 				{
 					extraTypeInfo = string.Format("   ({0})", valueType.Name);
 				}
-				changed |= visualization.Inspect("Element " + index + extraTypeInfo, path + "." + index, value, valueType, null,
+				changed |= inspector.Inspect("Element " + index + extraTypeInfo, path + "." + index, value, valueType, null,
 					v => list[curindex] = v);
 			}
 			return changed;

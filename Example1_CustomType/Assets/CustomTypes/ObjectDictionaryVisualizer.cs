@@ -1,15 +1,15 @@
 ﻿using System;
-using DataTools;
+using DataInspector;
 using UnityEditor;
 
-public class ObjectDictionaryVisualizer : DataVisualizer
+public class ObjectDictionaryVisualizer : VisualizerBase
 {
 	public override bool HasChildren()
 	{
 		return true;
 	}
 
-	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+	public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 	{
 		var dictionary = data as IObjectDictionary;
 		if (dictionary == null)

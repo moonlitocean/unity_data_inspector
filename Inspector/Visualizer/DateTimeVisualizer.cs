@@ -2,13 +2,13 @@
 using System.Globalization;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class DateTimeVisualizer : DataVisualizer
+	internal class DateTimeVisualizer : VisualizerBase
 	{
 		private static readonly DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Utc);
 
-		public override string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+		public override string GetLabelPostfix(Inspector inspector, object data, Type type)
 		{
 			var time = (DateTime) data;
 			return " " + time.Kind;
@@ -19,7 +19,7 @@ namespace DataTools
 			return true;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			var time = (DateTime) data;
 
@@ -31,7 +31,7 @@ namespace DataTools
 			return ApplyValueIfNotEqual(ref data, time);
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var time = (DateTime) data;
 			EditorGUILayout.LabelField("Unix Time Stamp", ToUnixTimestampString(time));

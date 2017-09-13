@@ -4,16 +4,16 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class UnityObjectVisualizer : DataVisualizer
+	internal class UnityObjectVisualizer : VisualizerBase
 	{
 		public override bool HasChildren()
 		{
 			return true;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			var obj = data as Object;
 			if (obj != null)
@@ -24,7 +24,7 @@ namespace DataTools
 			return ApplyValueIfNotEqual(ref data, obj);
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			bool changed = false;
 			var go = data as GameObject;
@@ -32,7 +32,7 @@ namespace DataTools
 			{
 				foreach (Component comp in go.GetComponents<Component>())
 				{
-					changed |= visualization.Inspect(comp.GetType().Name, path + "." + comp.GetType().Name, comp);
+					changed |= inspector.Inspect(comp.GetType().Name, path + "." + comp.GetType().Name, comp);
 				}
 			}
 
@@ -40,27 +40,27 @@ namespace DataTools
 				FieldInfo fieldInfo in
 					type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
 			{
-				changed |= InspectField(visualization, path, ref data, fieldInfo);
+				changed |= InspectField(inspector, path, ref data, fieldInfo);
 			}
 
 			foreach (
 				PropertyInfo propertyInfo in
 					type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
 			{
-				changed |= InspectProperty(visualization, path, ref data, propertyInfo);
+				changed |= InspectProperty(inspector, path, ref data, propertyInfo);
 			}
 			return changed;
 		}
 
-		private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldInfo fieldInfo)
+		private static bool InspectField(Inspector inspector, string path, ref object data, FieldInfo fieldInfo)
 		{
 			object value = fieldInfo.GetValue(data);
 			bool changed = false;
 			object newValue = null;
 			if (fieldInfo.IsInitOnly || fieldInfo.IsLiteral)
-				visualization.Inspect(fieldInfo.Name, path + "." + fieldInfo.Name, value, fieldInfo.FieldType);
+				inspector.Inspect(fieldInfo.Name, path + "." + fieldInfo.Name, value, fieldInfo.FieldType);
 			else
-				visualization.Inspect(fieldInfo.Name, path + "." + fieldInfo.Name, value, fieldInfo.FieldType, null,
+				inspector.Inspect(fieldInfo.Name, path + "." + fieldInfo.Name, value, fieldInfo.FieldType, null,
 					v =>
 					{
 						changed = true;
@@ -74,7 +74,7 @@ namespace DataTools
 			return changed;
 		}
 
-		private static bool InspectProperty(DataVisualization visualization, string path, ref object data,
+		private static bool InspectProperty(Inspector inspector, string path, ref object data,
 			PropertyInfo propertyInfo)
 		{
 			if (propertyInfo.CanRead && CanInspect(propertyInfo))
@@ -89,7 +89,7 @@ namespace DataTools
 					return false;
 				}
 
-				return visualization.Inspect(propertyInfo.Name, path + "." + propertyInfo.Name, value);
+				return inspector.Inspect(propertyInfo.Name, path + "." + propertyInfo.Name, value);
 			}
 			else
 			{

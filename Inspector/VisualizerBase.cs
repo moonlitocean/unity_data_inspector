@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DataTools
+namespace DataInspector
 {
-	public abstract class DataVisualizer
+	public abstract class VisualizerBase
 	{
 		// 是否使用了自定义了构造器。如果返回true，则需要实现 CustomCreateInstance
 		public virtual bool HasCustomCreator(Type type, IMark mark)
@@ -14,7 +14,7 @@ namespace DataTools
 		// 
 		// Normally, the label is field name.
 		// If not null, field will be appended with the returned postfix
-		public virtual string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+		public virtual string GetLabelPostfix(Inspector inspector, object data, Type type)
 		{
 			return null;
 		}
@@ -24,7 +24,7 @@ namespace DataTools
 		// GUI上下文：水平排列，其左侧会是自己的名称，当自己为引用类型时右侧会有一个+/-按钮。
 		// 应当正好产生一个 GUI 控件，这样可以维持一行两列的整齐排布。
 		// 在不产生控件的情况下，应当产生一个 flexibleSpace (正如本基类做的一样），以便保证右侧的 +/- 按钮靠右对齐
-		public virtual bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public virtual bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			GUILayout.FlexibleSpace();
 			return false;
@@ -45,10 +45,10 @@ namespace DataTools
 		// 用于展现子内容，典型的用途为：容器展示其数据，自定义数据结构展示其成员
 		// GUI上下文：垂直排列，多行控件。
 		//
-		// 一般递归对每个成员调用 visualization.InspectContent() 
+		// 一般递归对每个成员调用 inspector.InspectContent() 
 		//
 		// 返回数据是否被修改
-		public virtual bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public virtual bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			return false;
 		}

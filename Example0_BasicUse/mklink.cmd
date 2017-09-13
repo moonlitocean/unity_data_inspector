@@ -1,2 +1,2 @@
-@mklink /J Assets\LinkToDataVisualization ..\DataVisualization
+@mklink /J Assets\LinkToInspector ..\Inspector
 @pause

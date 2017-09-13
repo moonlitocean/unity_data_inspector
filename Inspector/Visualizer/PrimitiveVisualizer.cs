@@ -1,12 +1,12 @@
 ﻿using System;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class PrimitiveVisualizer : DataVisualizer
+	internal class PrimitiveVisualizer : VisualizerBase
 	{
 		// Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single.
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			object result;
 			if (data == null)

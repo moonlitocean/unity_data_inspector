@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DataTools
+namespace DataInspector
 {
 	public interface IMark{}
 	public class UnixTimestampAttribute : Attribute, IMark { }

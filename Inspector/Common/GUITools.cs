@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace DataTools
+namespace DataInspector
 {
 	public static class GUITools
 	{

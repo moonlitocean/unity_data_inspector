@@ -2,16 +2,16 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class UnityTypeVisualizer : DataVisualizer
+	internal class UnityTypeVisualizer : VisualizerBase
 	{
 		public override bool HasChildren()
 		{
 			return false;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			if (data is Color)
 			{

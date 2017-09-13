@@ -2,37 +2,37 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class CompositeVisualizer : DataVisualizer
+	internal class CompositeVisualizer : VisualizerBase
 	{
 		public override bool HasChildren()
 		{
 			return true;
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var fields = new List<FieldInfo>();
 
-			if (visualization.options.showStaticFields)
+			if (inspector.options.showStaticFields)
 			{
 				AppendFields(fields, type, BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-				if (visualization.options.showNonPublicFields)
+				if (inspector.options.showNonPublicFields)
 					AppendFields(fields, type, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			}
 
 			AppendFields(fields, type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-			if (visualization.options.showNonPublicFields)
+			if (inspector.options.showNonPublicFields)
 				AppendFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 
-			if (visualization.options.sortFields)
+			if (inspector.options.sortFields)
 				fields.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
 
 			bool changed = false;
 			foreach (var fieldInfo in fields)
 			{
-				changed |= InspectField(visualization, path, ref data, fieldInfo, "");
+				changed |= InspectField(inspector, path, ref data, fieldInfo, "");
 			}
 			return changed;
 		}
@@ -47,7 +47,7 @@ namespace DataTools
 			fields.AddRange(type.GetFields(bindingFlags | BindingFlags.DeclaredOnly));
 		}
 
-		private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldInfo fieldInfo,
+		private static bool InspectField(Inspector inspector, string path, ref object data, FieldInfo fieldInfo,
 			string prefix)
 		{
 			object value = fieldInfo.GetValue(data);
@@ -59,9 +59,9 @@ namespace DataTools
 			object changedvalue = null;
 			var mark = TypeTools.GetAttribute<IMark>(info);
 			if (inwritable)
-				visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
+				inspector.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
 			else
-				visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark, v =>
+				inspector.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark, v =>
 				{
 					changed = true;
 					changedvalue = v;

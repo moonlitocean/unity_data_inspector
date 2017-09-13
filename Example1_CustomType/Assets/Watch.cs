@@ -1,10 +1,10 @@
-﻿using DataTools;
+﻿using DataInspector;
 using UnityEditor;
 using UnityEngine;
 
 public class Watch : EditorWindow
 {
-	private readonly DataVisualization v;
+	private readonly Inspector inspector;
 	private Vector2 scroll;
 
 	public Watch()
@@ -12,9 +12,9 @@ public class Watch : EditorWindow
 		// Note: Awake() will be called after Unity recompile.
 		//	The most safe place to setup v is here.
 
-		v = new DataVisualization();
-		v.SetVisualizer(typeof(MyColor), new MyColorVisualizer());
-		v.SetVisualizer(typeof(ObjectDictionary<,>), new ObjectDictionaryVisualizer());
+		inspector = new Inspector();
+		inspector.SetVisualizer(typeof(MyColor), new MyColorVisualizer());
+		inspector.SetVisualizer(typeof(ObjectDictionary<,>), new ObjectDictionaryVisualizer());
 	}
 
 	[MenuItem("Window/Watch")]
@@ -27,8 +27,8 @@ public class Watch : EditorWindow
 	{
 		using (GUITools.Scroll(ref scroll))
 		{
-			v.Inspect("Inspector Options", "options", v.options);
-			v.Inspect("TestClass", "TestClass", typeof(TestClass));
+			inspector.Inspect("Inspector Options", "options", inspector.options);
+			inspector.Inspect("TestClass", "TestClass", typeof(TestClass));
 		}
 	}
 }

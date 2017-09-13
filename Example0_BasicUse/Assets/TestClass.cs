@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DataTools;
+using DataInspector;
 using UnityEngine;
 
 #pragma warning disable 414
@@ -15,11 +15,6 @@ public class TestClass
 	public class Derived : Base
 	{
 		public int derived = 3;
-	}
-
-	public class Derived2 : Base
-	{
-		public int derived2 = 4;
 	}
 
 	public enum EGoods

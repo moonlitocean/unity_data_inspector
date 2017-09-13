@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace DataTools
+namespace DataInspector
 {
-	public class DataVisualization
+	public class Inspector
 	{
 		public enum SpecialVisualizer
 		{
@@ -21,6 +21,7 @@ namespace DataTools
 			public int indentOffset = 15;	// Magic number, the offset of each EditorGUI.indentLevel. 
 											// (Used to correctly layout foldout rows, there should be some more Unity way but I dont know)
 
+			// TODO: Only supports CompositeVisualizer. Should apply to other visalizers.
 			public bool showNonPublicFields;
 			public bool showStaticFields;
 			public bool sortFields;
@@ -29,17 +30,17 @@ namespace DataTools
 		public readonly Options options = new Options();
 		public readonly Dictionary<string, bool> isFoldout = new Dictionary<string, bool>(StringComparer.Ordinal);
 
-		private static readonly Dictionary<Type, DataVisualizer> cachedVisualizer = new Dictionary<Type, DataVisualizer>();
+		private static readonly Dictionary<Type, VisualizerBase> cachedVisualizer = new Dictionary<Type, VisualizerBase>();
 
 		///////////////////////////////////////////////////////////////
 		// Visualizors in three categories: special, type rules, and IMark rules
-		private DataVisualizer primitiveAndNullVisualizer;
-		private DataVisualizer compositeVisualizer;
-		private DataVisualizer enumVisualizer;
-		private readonly Dictionary<Type, DataVisualizer> rules = new Dictionary<Type, DataVisualizer>();
-		private readonly Dictionary<Type, DataVisualizer> markRules = new Dictionary<Type, DataVisualizer>();
+		private VisualizerBase primitiveAndNullVisualizer;
+		private VisualizerBase compositeVisualizer;
+		private VisualizerBase enumVisualizer;
+		private readonly Dictionary<Type, VisualizerBase> rules = new Dictionary<Type, VisualizerBase>();
+		private readonly Dictionary<Type, VisualizerBase> markRules = new Dictionary<Type, VisualizerBase>();
 
-		public DataVisualization()
+		public Inspector()
 		{
 			RegisterDefaultVisualizers();
 		}
@@ -54,6 +55,8 @@ namespace DataTools
 
 			// static visualizers
 			// If input is a type, then show static members of that type
+			//
+			// The draw back is, you cannot inpect the real content of Type type anymore.
 			rules.Add(typeof (Type), new StaticVisualizer());
 
 			/////////////////////////////////////////////////////////////////////////
@@ -91,7 +94,7 @@ namespace DataTools
 			markRules.Clear();
 		}
 
-		public DataVisualizer GetVisualizer(Type type)
+		public VisualizerBase GetVisualizer(Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException();
@@ -102,7 +105,7 @@ namespace DataTools
 				return markRules[type];
 		}
 
-		public void SetVisualizer(Type type, DataVisualizer income)
+		public void SetVisualizer(Type type, VisualizerBase income)
 		{
 			if (type == null || income == null)
 				throw new ArgumentNullException();
@@ -125,7 +128,7 @@ namespace DataTools
 		}
 
 
-		public DataVisualizer GetSpecialVisualizer(SpecialVisualizer type)
+		public VisualizerBase GetSpecialVisualizer(SpecialVisualizer type)
 		{
 			switch (type)
 			{
@@ -140,7 +143,7 @@ namespace DataTools
 			}
 		}
 
-		public void SetSpecialVisualizer(SpecialVisualizer type, DataVisualizer income)
+		public void SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 		{
 			if (income == null)
 				throw new ArgumentException();
@@ -170,7 +173,7 @@ namespace DataTools
 				type = data != null ? data.GetType() : null;
 
 			EditorGUIUtility.labelWidth = options.labelWidth;
-			DataVisualizer visualizer = GetVisualizor(type, mark);
+			VisualizerBase visualizer = GetVisualizor(type, mark);
 			bool changed = false;
 			object changedData = data;
 			if (visualizer != null)
@@ -221,7 +224,7 @@ namespace DataTools
 		}
 
 
-		private bool InspectRoot(string name, Type type, ref object data, DataVisualizer visualizer, IMark mark)
+		private bool InspectRoot(string name, Type type, ref object data, VisualizerBase visualizer, IMark mark)
 		{
 			using (new EditorGUILayout.HorizontalScope())
 			{
@@ -249,7 +252,7 @@ namespace DataTools
 			}
 		}
 
-		private static object CreateClassInstance(Type type, DataVisualizer visualizer, IMark mark)
+		private static object CreateClassInstance(Type type, VisualizerBase visualizer, IMark mark)
 		{
 			if (visualizer.HasCustomCreator(type, mark))
 				return visualizer.CustomCreateInstance(type, mark);
@@ -276,14 +279,14 @@ namespace DataTools
 		//  * Registered interface that is the interface of current type
 		//		If multiply interfaces match, the result is unspecified, depend on the sequence of GetInterfaces()
 		//  * Finally, if no visualizer is matched, return composite visualizer
-		private DataVisualizer GetVisualizor(Type type, IMark mark)
+		private VisualizerBase GetVisualizor(Type type, IMark mark)
 		{
 			if (mark != null)
 				return FindMarkVisualizer(mark);
 			if (type == null)
 				return primitiveAndNullVisualizer;
 
-			DataVisualizer v;
+			VisualizerBase v;
 			if (!cachedVisualizer.TryGetValue(type, out v))
 			{
 				v = FindVisualizor(type);
@@ -292,7 +295,7 @@ namespace DataTools
 			return v;
 		}
 
-		private DataVisualizer FindVisualizor(Type type)
+		private VisualizerBase FindVisualizor(Type type)
 		{
 			if (type.IsPrimitive)
 				return primitiveAndNullVisualizer;
@@ -303,7 +306,7 @@ namespace DataTools
 			if (rules.ContainsKey(type))
 				return rules[type];
 
-			DataVisualizer visualizor = FindBaseTypeVisualizer(type);
+			VisualizerBase visualizor = FindBaseTypeVisualizer(type);
 			if (visualizor != null)
 				return visualizor;
 
@@ -314,7 +317,7 @@ namespace DataTools
 			return compositeVisualizer;
 		}
 
-		private DataVisualizer FindMarkVisualizer(IMark mark)
+		private VisualizerBase FindMarkVisualizer(IMark mark)
 		{
 			var t = mark.GetType();
 			if (markRules.ContainsKey(t))
@@ -323,7 +326,7 @@ namespace DataTools
 			throw new NotImplementedException(mark.ToString());
 		}
 
-		private DataVisualizer FindBaseTypeVisualizer(Type type)
+		private VisualizerBase FindBaseTypeVisualizer(Type type)
 		{
 			for (Type t = type; t != null; t = t.BaseType)
 			{
@@ -341,7 +344,7 @@ namespace DataTools
 			return null;
 		}
 
-		private DataVisualizer FindInterfaceVisualizer(Type type)
+		private VisualizerBase FindInterfaceVisualizer(Type type)
 		{
 			foreach (var t in type.GetInterfaces())
 			{

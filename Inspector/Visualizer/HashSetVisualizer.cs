@@ -2,16 +2,16 @@
 using System.Collections;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class HashSetVisualizer : DataVisualizer
+	internal class HashSetVisualizer : VisualizerBase
 	{
 		public override bool HasChildren()
 		{
 			return true;
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			var container = data as IEnumerable;
 			if (container == null)
@@ -21,7 +21,7 @@ namespace DataTools
 			return false;
 		}
 
-		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var c = data as IEnumerable;
 			if (c == null)
@@ -36,7 +36,7 @@ namespace DataTools
 			foreach (var value in c)
 			{
 				Type valueType = value != null ? value.GetType() : hashsetValueType;
-				changed |= visualization.Inspect(i.ToString(), path + "." + i, value, valueType);
+				changed |= inspector.Inspect(i.ToString(), path + "." + i, value, valueType);
 				++i;
 			}
 			return changed;

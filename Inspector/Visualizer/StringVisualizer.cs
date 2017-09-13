@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEditor;
 
-namespace DataTools
+namespace DataInspector
 {
-	internal class StringVisualizer : DataVisualizer
+	internal class StringVisualizer : VisualizerBase
 	{
 		public override bool HasCustomCreator(Type type, IMark mark)
 		{
@@ -15,7 +15,7 @@ namespace DataTools
 			return "";
 		}
 
-		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			if (data == null)
 			{
