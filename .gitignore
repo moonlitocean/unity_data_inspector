@@ -2,8 +2,10 @@ Temp
 Library
 LinkToDataVisualization
 CustomVisualizor
+ProjectSettings
 *.meta
 *.CSharp.csproj*
 *.sln*
 *.suo
+
 
