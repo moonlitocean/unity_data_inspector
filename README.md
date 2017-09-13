@@ -1,38 +1,44 @@
 # unity_data_inspector
-A data inspector lib for Unity, to inspect/edit any data structure from Editor script.
+Inspect/Edit any data from Editor script through reflection.
 
-# Example
+![feature.jpg](feature.jpg)
 
-* Example0_BasicUse: view most type, also as a testing.
-* Example1_CustomType: show custom inspector
+# Examples
 
-Before opening any example project, you should firstly run script mklink.cmd in the Example  folder, which creates a symbolic link to the lib source code. After that, example is a valid Unity3d project.
+First run mklink.cmd scripts from each Example* folder, which creates symbolic links to the lib source code. After that, Examples are valid Unity3d projects.
 
-Click Window/Watch menu will give you the example window.
+Click Window/Watch menu to open the example window.
 
 # Features
 
-## Inpect any data
+## Inpect data
 
-```Inspector.Inspect(string name, string path, object data)```
+```c#
+private Inspector ins;
+ins.Inspect(string name, string path, object data)
+```
 
 ## Custom visualizers
 
-```
-Inspector.RemoveAllVisualizers()
+```c#
+class MyVisualizer : VisualizerBase { /**/ }
 
-Inspector.GetVisualizer(Type type)
-Inspector.SetVisualizer(Type type, VisualizerBase income)
-Inspector.RemoveVisualizer(Type type)
+ins.RemoveAllVisualizers()
 
-Inspector.GetSpecialVisualizer(SpecialVisualizer type)
-Inspector.SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
+ins.GetVisualizer(Type type)
+ins.SetVisualizer(Type type, VisualizerBase income)
+ins.RemoveVisualizer(Type type)
+
+ins.GetSpecialVisualizer(SpecialVisualizer type)
+ins.SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 ```
+Supports generic type and inheritance.  
 
 ## Use IMarkAttribute to provide different views 
 
-For example, normally an int uses PrimitiveVisualizer. But if some int represents a timestamp, you can define and mark it as UnityTimeStamp for UnixTimestampVisualizer, which displays the time.
+To mark some int as timestamp, or mark some string as Locale (that can translates from "skill.101.name" to  "Rocket Punch").
 
-```
+```c#
 [UnixTimestamp]int time;
+[Locale]string skill_name;
 ```
