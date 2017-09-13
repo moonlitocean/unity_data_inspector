@@ -1,5 +1,5 @@
 # unity_data_inspector
-Inspect/Edit any data from Editor script through reflection.
+Inspect/Edit any data from Editor script through reflection. Highly extensible.
 
 ![feature.jpg](feature.jpg)
 
@@ -34,9 +34,7 @@ ins.SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 ```
 Supports generic type and inheritance.  
 
-## Define IMarkAttribute to provide different views 
-
-To mark some int as timestamp, or mark some string as Locale (that can translates from "skill.101.name" to  "Rocket Punch").
+To further customize, you can define attributes, e.g. mark some int as timestamp, or mark some string as Locale (that can translates from "skill.101.name" to  "Rocket Punch").
 
 ```c#
 [UnixTimestamp]int time;
