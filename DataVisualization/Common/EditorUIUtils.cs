@@ -9,7 +9,7 @@ public static class EditorUIUtils
 {
 	private class DictionaryDisplay
 	{
-		public readonly object[] keys;		// 原始key列表，用于判断Dictionary是否变化。如果不需要判断，则可以为null
+		public readonly object[] keys;			// 原始key列表，用于判断Dictionary是否变化。如果不需要判断，则可以为null
 		public readonly object[] sorted;		// 排序过的key，用于显示。
 		public readonly string[] cachedGroupTitles;
 
@@ -54,43 +54,6 @@ public static class EditorUIUtils
 	private const int GroupElemsCount = 100;
 	private static readonly Dictionary<WeakReference, DictionaryGUIState> guiCache = new Dictionary<WeakReference, DictionaryGUIState>();
 	private static DateTime lastCacheRecycleCheck;
-
-	public static bool EditElems<T>(IList<T> items, Func<T, bool> ShowItem, Dictionary<string, bool> foldout, string foldoutRoot)
-	{
-		bool changed = false;
-		if (items.Count <= GroupElemsCount)
-		{
-			foreach (var elem in items)
-			{
-				changed |= ShowItem(elem);
-			}
-		}
-		else
-		{
-			for (int i = 0; i < items.Count; i += GroupElemsCount)
-			{
-				string key = FormatKeyRange(items, i, Math.Min(i + GroupElemsCount - 1, items.Count - 1));
-
-				var foldkey = foldoutRoot + "." + key;
-				if (!foldout.ContainsKey(foldkey))
-				{
-					foldout[foldkey] = false;
-				}
-				foldout[foldkey] = GUITools.Foldout(foldout[foldkey], key, true);
-
-				if (foldout[foldkey])
-				{
-					++EditorGUI.indentLevel;
-					for (int index = 0; index < GroupElemsCount && i + index < items.Count; index++)
-					{
-						changed |= ShowItem(items[i + index]);
-					}
-					--EditorGUI.indentLevel;
-				}
-			}
-		}
-		return changed;
-	}
 
 	// 如果数据发生了修改，则返回true
 	// bool EditItem(key, value) 返回数据项是否发生了修改

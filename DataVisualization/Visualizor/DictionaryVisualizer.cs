@@ -17,7 +17,7 @@ internal class DictionaryVisualizer : DataVisualizer
 			return false;
 
 		EditorGUIUtility.labelWidth = DataVisualization.LabelWidth;
-		EditorGUILayout.LabelField("Count: ", dictionary.Count.ToString());
+		EditorGUILayout.LabelField("Count: " + dictionary.Count);
 		return false;
 	}
 

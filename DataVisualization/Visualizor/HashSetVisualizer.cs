@@ -12,11 +12,11 @@ internal class HashSetVisualizer : DataVisualizer
 
 	public override bool InspectSelf(string name, ref object data, Type type)
 	{
-		IEnumerable container = data as IEnumerable;
+		var container = data as IEnumerable;
 		if (container == null)
 			return false;
 
-		EditorGUILayout.LabelField("Count: ", GetCount(data).ToString());
+		EditorGUILayout.LabelField("Count: " + GetCount(data));
 		return false;
 	}
 

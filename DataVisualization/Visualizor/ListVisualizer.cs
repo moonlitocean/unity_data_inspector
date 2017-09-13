@@ -3,7 +3,7 @@ using System.Collections;
 using DataTools;
 using UnityEditor;
 
-internal class ListArrayVisualizer : DataVisualizer
+internal class ListVisualizer : DataVisualizer
 {
 	public override bool HasChildren()
 	{
@@ -16,7 +16,7 @@ internal class ListArrayVisualizer : DataVisualizer
 		if (list == null)
 			return false;
 
-		EditorGUILayout.LabelField("Size:" + list.Count);
+		EditorGUILayout.LabelField("Count: " + list.Count);
 		return false;
 	}
 
@@ -26,17 +26,14 @@ internal class ListArrayVisualizer : DataVisualizer
 		if (list == null)
 			return false;
 
+		Type listValueType = GetElemType(list);
 		int newCount = EditorGUILayout.DelayedIntField("Size", list.Count);
 		newCount = Math.Max(0, newCount);
 		if (newCount != list.Count)
 		{
-			data = ResizeList(list, newCount);
+			data = Resize(list, newCount, listValueType);
 			return true;
 		}
-
-		Type listValueType = null;
-		if (TypeTools.IsSubclassOfList(type))
-			listValueType = TypeTools.GetListValueType(type);
 
 		bool changed = false;
 		for (int index = 0; index < list.Count; ++index)
@@ -54,20 +51,32 @@ internal class ListArrayVisualizer : DataVisualizer
 		return changed;
 	}
 
-	private IList ResizeList(IList list, int newCount)
+	protected IList Resize(IList list, int newCount, Type elemType)
 	{
-		if (TypeTools.IsSubclassOfList(list.GetType()))
-		{
-			TypeTools.ResizeGenericList(list, newCount);
-			return list;
-		}
-		else if (list.GetType().IsArray)
+		if (list.GetType().IsArray)
 		{
 			return TypeTools.ResizeArray(list as Array, newCount);
 		}
 		else
 		{
+			while (list.Count > newCount)
+			{
+				list.RemoveAt(list.Count - 1);
+			}
+			while (list.Count < newCount)
+			{
+				list.Add(TypeTools.CreateInstance(elemType));
+			}
 			return list;
 		}
+	}
+
+	protected virtual Type GetElemType(IList list)
+	{
+		var t = list.GetType();
+		if (t.IsArray)
+			return t.GetElementType();
+		else
+			return TypeTools.GetListValueType(t);
 	}
 }

@@ -9,7 +9,6 @@ namespace DataTools
 	public static class TypeTools
 	{
 		private static readonly Type DictionaryGenericType = typeof(Dictionary<,>);
-		// private static readonly Type ObjectDictionaryGenericType = typeof(ObjectDictionary<,>);
 		private static readonly Type ListGenericType = typeof(List<>);
 		private static readonly Type HashSetGenericType = typeof(HashSet<>);
 
@@ -87,7 +86,7 @@ namespace DataTools
 		public static Array ResizeArray(Array array, int newCount)
 		{
 			if (newCount < 0)  throw new ArgumentException();
-			if (array == null) throw new ArgumentNullException("list");
+			if (array == null) throw new ArgumentNullException("array");
 
 			Type elemType = array.GetType().GetElementType();
 
@@ -104,32 +103,6 @@ namespace DataTools
 				}
 			}
 			return resized;
-		}
-
-		public static object[] BuildDefaultParamList(MethodInfo method)
-		{
-			ParameterInfo[] paramInfoList = method.GetParameters();
-			var paramList = new object[paramInfoList.Length];
-			for (int i = 0; i < paramInfoList.Length; ++i)
-			{
-				var paramInfo = paramInfoList[i];
-				if (paramInfo.IsOptional)
-				{
-					paramList[i] = paramInfo.DefaultValue;
-				}
-				else
-				{
-					try
-					{
-						paramList[i] = CreateInstance(paramInfo.ParameterType);
-					}
-					catch (Exception)
-					{
-						paramList[i] = null;
-					}
-				}
-			}
-			return paramList;
 		}
 
 		public static object CreateInstance(Type type)

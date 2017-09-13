@@ -53,7 +53,6 @@ public class DataVisualization
 		finelTypeVisualizor.Add(typeof(Rect), GetVisualizer(typeof(UnityTypeVisualizer)));
 	    finelTypeVisualizor.Add(typeof(AnimationCurve), GetVisualizer(typeof(UnityTypeVisualizer)));
 
-
 	    // 基础数学类型，自定义的FF系列，BB系列
 		//finelTypeVisualizor.Add(typeof(FFQuaternion), GetVisualizer(typeof(FFQuaternionVisualizor)));
 		//finelTypeVisualizor.Add(typeof(FFColor), GetVisualizer(typeof(FFColorVisualizor)));
@@ -235,7 +234,7 @@ public class DataVisualization
 			return GetVisualizer(typeof(MulticastDelegateVisualizer));
 
 		if (TypeTools.IsSubclassOfList(type) || type.IsArray)
-			return GetVisualizer(typeof(ListArrayVisualizer));
+			return GetVisualizer(typeof(ListVisualizer));
 
 		if (TypeTools.IsSubclassOfDictionary(type))
 			return GetVisualizer(typeof(DictionaryVisualizer));

@@ -69,7 +69,7 @@ public class TestClass
 	// CompositeVisualizer
 	public Base _base = new Derived();
 
-	// ListArrayVisualizer
+	// ListVisualizer
 	// DictionaryVisualizer
 	// HashSetVisualizer
 	public int[] _arrayi = new int[3];
