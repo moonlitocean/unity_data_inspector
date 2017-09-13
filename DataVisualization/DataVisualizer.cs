@@ -1,5 +1,6 @@
 ﻿using System;
 using DataTools;
+using UnityEngine;
 
 public abstract class DataVisualizer
 {
@@ -20,9 +21,11 @@ public abstract class DataVisualizer
 	// OnGUI中回调。用GUI显示或编辑自己的单行数据值，并返回数据是否被修改。
 	// 
 	// GUI上下文：水平排列，其左侧会是自己的名称，当自己为引用类型时右侧会有一个+/-按钮。
-	// 建议只产生一个 GUI 控件，这样可以维持一行两列的整齐排布
+	// 应当正好产生一个 GUI 控件，这样可以维持一行两列的整齐排布。
+	// 在不产生控件的情况下，应当产生一个 flexibleSpace (正如本基类做的一样），以便保证右侧的 +/- 按钮靠右对齐
 	public virtual bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
+		GUILayout.FlexibleSpace();
 		return false;
 	}
 

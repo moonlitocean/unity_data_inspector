@@ -7,7 +7,6 @@ internal class PrimitiveVisualizer : DataVisualizer
 	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 	{
 		object result;
-		EditorGUIUtility.labelWidth = visualization.options.labelWidth;
 		if (data == null)
 		{
 			EditorGUILayout.LabelField(name, "null");

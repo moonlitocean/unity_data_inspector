@@ -16,7 +16,10 @@ public class DataVisualization
 	};
 	public class Options
 	{
-		public float labelWidth = 250;
+		public int labelWidth = 250;		// The label width of the first column.
+		public int indentOffset = 15;		// Magic number, the offset of each EditorGUI.indentLevel. 
+											// (Used to correctly layout foldout rows, there should be some more Unity way but I dont know)
+
 		public bool showNonPublicFields;
 		public bool showStaticFields;
 		public bool sortFields;
@@ -76,26 +79,6 @@ public class DataVisualization
 
 		// Markers
 		markRules.Add(typeof (UnixTimestampAttribute), new UnixTimeStampVisualizer());
-
-		// SetVisualizer(typeof(LocaleAttribute), GetVisualizer(typeof(LocaleStringVisualizor)));
-
-		// 基础数学类型，自定义的FF系列，BB系列
-		//rules.Add(typeof(FFQuaternion), GetVisualizer(typeof(FFQuaternionVisualizor)));
-		//rules.Add(typeof(FFColor), GetVisualizer(typeof(FFColorVisualizor)));
-		//rules.Add(typeof(BBFloat), GetVisualizer(typeof(FloatDataVisualizor)));
-		//rules.Add(typeof(BBInt), GetVisualizer(typeof(BBIntVisualizor)));
-		//rules.Add(typeof(BBVector3), GetVisualizer(typeof(Vector3DataVisualizor)));
-		//rules.Add(typeof(BBObjectData), GetVisualizer(typeof(BBObjectDataVisualizor)));
-
-		// 自定义游戏内类型
-		//rules.Add(typeof(ObjectData), GetVisualizer(typeof(ObjectDataVisualizor)));
-		//rules.Add(typeof(BlackBoardData), GetVisualizer(typeof(BlackBoardDataVisualizor)));
-		//rules.Add(typeof(AITargetData), GetVisualizer(typeof(AITargetDataVisualizor)));
-		//rules.Add(typeof(InspectorMethod), GetVisualizer(typeof(CallableMethodVisualizor)));
-		//rules.Add(typeof(UINode), GetVisualizer(typeof(UINodeVisualizor)));
-		//rules.Add(typeof(AttributeVariable), GetVisualizer(typeof(AttributeVariableVisualizor)));
-		//rules.Add(typeof(RangeAttributeVariable_long), GetVisualizer(typeof(RangeAttributeVariable_longVisualizor)));
-		//rules.Add(typeof(RangeAttributeVariable_float), GetVisualizer(typeof(RangeAttributeVariable_floatVisualizor)));
 	}
 
 	public void RemoveVisualizer(Type type)
@@ -124,6 +107,21 @@ public class DataVisualization
 			markRules[type] = income;
 		else
 			rules[type] = income;
+	}
+
+	public DataVisualizer GetSpecialVisualizer(SpecialVisualizer type)
+	{
+		switch (type)
+		{
+			case SpecialVisualizer.Composite:
+				return compositeVisualizer;
+			case SpecialVisualizer.Enum:
+				return enumVisualizer;
+			case SpecialVisualizer.PrimitiveAndNull:
+				return primitiveAndNullVisualizer;
+			default:
+				throw new NotImplementedException(type.ToString());
+		}
 	}
 
 	public void SetSpecialVisualizer(SpecialVisualizer type, DataVisualizer income)
@@ -155,6 +153,7 @@ public class DataVisualization
 		if(type == null)
 			type = data != null ? data.GetType() : null;
 
+		EditorGUIUtility.labelWidth = options.labelWidth;
 		DataVisualizer visualizer = GetVisualizor(type, mark);
 		bool changed = false;
 		object changedData = data;
@@ -167,16 +166,25 @@ public class DataVisualization
 
 			if (visualizer.HasChildren())
 			{
-				const int lableWidth = 220;
-				EditorGUILayout.BeginHorizontal();
-				using (new EditorGUILayout.HorizontalScope(GUILayout.Width(lableWidth)))
+				bool alwaysShowChildren = visualizer.AlwaysShowChildren();
+				if (!alwaysShowChildren)
 				{
-					isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo, true);
+					using (new EditorGUILayout.HorizontalScope())
+					{
+						var width = options.labelWidth - options.indentOffset* EditorGUI.indentLevel;
+						using (new EditorGUILayout.HorizontalScope(GUILayout.Width(width)))
+						{
+							isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo, true);
+						}
+						changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
+					}
 				}
-				changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
-				EditorGUILayout.EndHorizontal();
+				else
+				{
+					changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
+				}
 
-				if (changedData != null && isFoldout[path])
+				if (changedData != null && (alwaysShowChildren || isFoldout[path]))
 				{
 					EditorGUI.indentLevel++;
 					changed |= visualizer.InspectChildren(this, path, ref changedData, type);
@@ -204,8 +212,6 @@ public class DataVisualization
 			bool changed = visualizer.InspectSelf(this, name, ref data, type);
 			if (type != null && type.IsClass)
 			{
-                if(!(data is string))
-				    GUILayout.FlexibleSpace();
 				if (data != null)
 				{
 					if (GUILayout.Button("-", GUILayout.Width(20)))

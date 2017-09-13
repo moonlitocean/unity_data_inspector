@@ -4,8 +4,15 @@ using UnityEngine;
 
 public class Watch : EditorWindow
 {
-	private readonly DataVisualization v = new DataVisualization();
+	private readonly DataVisualization v;
 	private Vector2 scroll;
+
+	public Watch()
+	{
+		// The most safe place to initialize v is here, expecially when you need to call member functions to setup v.
+		// Awake() may not be called after recompile.
+		v = new DataVisualization();
+	}
 
 	[MenuItem("Window/Watch")]
 	public static void ShowWindow()

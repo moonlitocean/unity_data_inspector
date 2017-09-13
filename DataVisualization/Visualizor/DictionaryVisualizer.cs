@@ -16,7 +16,6 @@ internal class DictionaryVisualizer : DataVisualizer
 		if (dictionary == null)
 			return false;
 
-		EditorGUIUtility.labelWidth = visualization.options.labelWidth;
 		EditorGUILayout.LabelField("Count: " + dictionary.Count);
 		return false;
 	}
