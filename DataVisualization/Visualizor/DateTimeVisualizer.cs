@@ -4,7 +4,13 @@ using UnityEditor;
 
 internal class DateTimeVisualizer : DataVisualizer
 {
-	private readonly static DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Unspecified);
+	private readonly static DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Utc);
+
+	public override string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+	{
+		var time = (DateTime)data;
+		return " " + time.Kind;
+	}
 
 	public override bool HasChildren()
 	{
@@ -15,7 +21,7 @@ internal class DateTimeVisualizer : DataVisualizer
 	{
 		var time = (DateTime)data;
 
-		string oldstrdate = time.ToString(CultureInfo.InvariantCulture);
+		string oldstrdate = time.ToString(CultureInfo.CurrentCulture);
 		string strdate = EditorGUILayout.TextField(oldstrdate);
 		if (oldstrdate != strdate)
 			time = ParseDateTime(strdate, time.Kind, time);
@@ -26,7 +32,7 @@ internal class DateTimeVisualizer : DataVisualizer
 	public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
 	{
 		var time = (DateTime)data;
-		EditorGUILayout.TextField("Unix Time Stamp", ToUnixTimestampString(time));
+		EditorGUILayout.LabelField("Unix Time Stamp", ToUnixTimestampString(time));
 
 		var ticks = EditorGUILayout.LongField("Ticks", time.Ticks);
 		var kind = (DateTimeKind) EditorGUILayout.EnumPopup("Kind", time.Kind);
@@ -57,6 +63,7 @@ internal class DateTimeVisualizer : DataVisualizer
 
 	private static string ToUnixTimestampString(DateTime time)
 	{
+		time = time.ToUniversalTime();
 		if (time >= CTIME_BEGIN)
 		{
 			var ts = time.Subtract(CTIME_BEGIN);
@@ -65,7 +72,7 @@ internal class DateTimeVisualizer : DataVisualizer
 		}
 		else
 		{
-			return "[Bad date: Under 1970]";
+			return "[Bad date: Under 1970 UTC]";
 		}
 	}
 }

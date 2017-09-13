@@ -9,6 +9,14 @@ public abstract class DataVisualizer
 		return false;
 	}
 
+	// 
+	// Normally, the label is field name.
+	// If not null, field will be appended with the returned postfix
+	public virtual string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+	{
+		return null;
+	}
+
 	// OnGUI中回调。用GUI显示或编辑自己的单行数据值，并返回数据是否被修改。
 	// 
 	// GUI上下文：水平排列，其左侧会是自己的名称，当自己为引用类型时右侧会有一个+/-按钮。

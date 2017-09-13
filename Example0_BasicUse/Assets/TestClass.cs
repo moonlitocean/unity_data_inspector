@@ -104,7 +104,7 @@ public class TestClass
 	// TimeSpanVisualizer
 	public DateTime _datetime = new DateTime(2010, 1, 1);
 	public TimeSpan _timespan = TimeSpan.FromDays(2.5);
-	[UnixTimestamp] public int _timestamp = 10*365*24*3600;
+	[UnixTimestamp] public int _timestamp = 1262304000; // 2010/01/01 00:00:00 UTC
 
 	//----------------------------------------------------
 	// Final TestClass

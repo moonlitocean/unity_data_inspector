@@ -6,14 +6,13 @@ using DataTools.Editor;
 using UnityEditor;
 using UnityEngine;
 
-
 public class DataVisualization
 {
 	public enum SpecialVisualizer
 	{
-		Primitive,
+		PrimitiveAndNull,
+		Enum,
 		Composite,
-		Enum
 	};
 	public class Options
 	{
@@ -28,7 +27,7 @@ public class DataVisualization
 	private static readonly Dictionary<Type, DataVisualizer> cachedVisualizer = new Dictionary<Type, DataVisualizer>();
 
 	// Visualizors映射
-	private DataVisualizer primitiveVisualizer;
+	private DataVisualizer primitiveAndNullVisualizer;
 	private DataVisualizer compositeVisualizer;
 	private DataVisualizer enumVisualizer;
     private readonly Dictionary<Type, DataVisualizer> rules = new Dictionary<Type, DataVisualizer>();
@@ -37,32 +36,13 @@ public class DataVisualization
     public DataVisualization()
     {
 	    RegisterDefaultVisualizers();
-	    // SetVisualizer(typeof(LocaleAttribute), GetVisualizer(typeof(LocaleStringVisualizor)));
-
-	    // 基础数学类型，自定义的FF系列，BB系列
-	    //rules.Add(typeof(FFQuaternion), GetVisualizer(typeof(FFQuaternionVisualizor)));
-	    //rules.Add(typeof(FFColor), GetVisualizer(typeof(FFColorVisualizor)));
-	    //rules.Add(typeof(BBFloat), GetVisualizer(typeof(FloatDataVisualizor)));
-	    //rules.Add(typeof(BBInt), GetVisualizer(typeof(BBIntVisualizor)));
-	    //rules.Add(typeof(BBVector3), GetVisualizer(typeof(Vector3DataVisualizor)));
-	    //rules.Add(typeof(BBObjectData), GetVisualizer(typeof(BBObjectDataVisualizor)));
-
-	    // 自定义游戏内类型
-	    //rules.Add(typeof(ObjectData), GetVisualizer(typeof(ObjectDataVisualizor)));
-	    //rules.Add(typeof(BlackBoardData), GetVisualizer(typeof(BlackBoardDataVisualizor)));
-	    //rules.Add(typeof(AITargetData), GetVisualizer(typeof(AITargetDataVisualizor)));
-	    //rules.Add(typeof(InspectorMethod), GetVisualizer(typeof(CallableMethodVisualizor)));
-	    //rules.Add(typeof(UINode), GetVisualizer(typeof(UINodeVisualizor)));
-	    //rules.Add(typeof(AttributeVariable), GetVisualizer(typeof(AttributeVariableVisualizor)));
-	    //rules.Add(typeof(RangeAttributeVariable_long), GetVisualizer(typeof(RangeAttributeVariable_longVisualizor)));
-	    //rules.Add(typeof(RangeAttributeVariable_float), GetVisualizer(typeof(RangeAttributeVariable_floatVisualizor)));
     }
 
 	private void RegisterDefaultVisualizers()
 	{
 		/////////////////////////////////////////////////////////////////////////
 		// Register three core visualizer
-		primitiveVisualizer = new PrimitiveVisualizer();
+		primitiveAndNullVisualizer = new PrimitiveVisualizer();
 		compositeVisualizer = new CompositeVisualizer();
 		enumVisualizer = new EnumVisualizer();
 
@@ -95,7 +75,27 @@ public class DataVisualization
 		rules.Add(typeof (AnimationCurve), unityTypeVisualizer);
 
 		// Markers
-		markRules.Add(typeof (UnixTimestampAttribute), rules[typeof (DateTime)]);
+		markRules.Add(typeof (UnixTimestampAttribute), new UnixTimeStampVisualizer());
+
+		// SetVisualizer(typeof(LocaleAttribute), GetVisualizer(typeof(LocaleStringVisualizor)));
+
+		// 基础数学类型，自定义的FF系列，BB系列
+		//rules.Add(typeof(FFQuaternion), GetVisualizer(typeof(FFQuaternionVisualizor)));
+		//rules.Add(typeof(FFColor), GetVisualizer(typeof(FFColorVisualizor)));
+		//rules.Add(typeof(BBFloat), GetVisualizer(typeof(FloatDataVisualizor)));
+		//rules.Add(typeof(BBInt), GetVisualizer(typeof(BBIntVisualizor)));
+		//rules.Add(typeof(BBVector3), GetVisualizer(typeof(Vector3DataVisualizor)));
+		//rules.Add(typeof(BBObjectData), GetVisualizer(typeof(BBObjectDataVisualizor)));
+
+		// 自定义游戏内类型
+		//rules.Add(typeof(ObjectData), GetVisualizer(typeof(ObjectDataVisualizor)));
+		//rules.Add(typeof(BlackBoardData), GetVisualizer(typeof(BlackBoardDataVisualizor)));
+		//rules.Add(typeof(AITargetData), GetVisualizer(typeof(AITargetDataVisualizor)));
+		//rules.Add(typeof(InspectorMethod), GetVisualizer(typeof(CallableMethodVisualizor)));
+		//rules.Add(typeof(UINode), GetVisualizer(typeof(UINodeVisualizor)));
+		//rules.Add(typeof(AttributeVariable), GetVisualizer(typeof(AttributeVariableVisualizor)));
+		//rules.Add(typeof(RangeAttributeVariable_long), GetVisualizer(typeof(RangeAttributeVariable_longVisualizor)));
+		//rules.Add(typeof(RangeAttributeVariable_float), GetVisualizer(typeof(RangeAttributeVariable_floatVisualizor)));
 	}
 
 	public void RemoveVisualizer(Type type)
@@ -139,8 +139,8 @@ public class DataVisualization
 			case SpecialVisualizer.Enum:
 				enumVisualizer = income;
 				break;
-			case SpecialVisualizer.Primitive:
-				primitiveVisualizer = income;
+			case SpecialVisualizer.PrimitiveAndNull:
+				primitiveAndNullVisualizer = income;
 				break;
 			default:
 				throw new NotImplementedException(type.ToString());
@@ -155,12 +155,16 @@ public class DataVisualization
 		if(type == null)
 			type = data != null ? data.GetType() : null;
 
-		DataVisualizer visualizer = GetDataVisualizor(type, mark);
+		DataVisualizer visualizer = GetVisualizor(type, mark);
 		bool changed = false;
 		object changedData = data;
 		if (visualizer != null)
 		{
 			string fieldinfo = name;
+			var postfix = visualizer.GetLabelPostfix(this, data, type);
+			if (postfix != null)
+				fieldinfo += postfix;
+
 			if (visualizer.HasChildren())
 			{
 				const int lableWidth = 220;
@@ -239,39 +243,37 @@ public class DataVisualization
 		}
 	}
 
-	private DataVisualizer GetDataVisualizor(Type type, IMark mark)
-	{
-		if (mark == null && type == null)
-			return primitiveVisualizer;
-
-		DataVisualizer v;
-		if(!cachedVisualizer.TryGetValue(type, out v))
-		{
-			v = FindVisualizor(type, mark);
-			cachedVisualizer[type] = v;
-		}
-		return v;
-	}
-
 	// Match Order:
-	//	* Registered IMark
-	//  * Primitives
-	//  * Enums
+	//	* IMark
+	//  * type is null -> Primitive
+	//  * type.isPrimitive
+	//  * type.isEnum
 	//  * Registered concrete type that equals to the current type
 	//  * Registered type that is the first matched base type or generice base type
 	//		Concrete type first, dont support partially binded type
 	//  * Registered interface that is the interface of current type
 	//		If multiply interfaces match, the result is unspecified, depend on the sequence of GetInterfaces()
-	private DataVisualizer FindVisualizor(Type type, IMark mark)
+	//  * Finally, if no visualizer is matched, return composite visualizer
+	private DataVisualizer GetVisualizor(Type type, IMark mark)
 	{
-		if (type == null && mark == null)
-			throw new NullReferenceException("There must be at least one argument that is not null");
-
 		if (mark != null)
 			return FindMarkVisualizer(mark);
+		if (type == null)
+			return primitiveAndNullVisualizer;
 
+		DataVisualizer v;
+		if(!cachedVisualizer.TryGetValue(type, out v))
+		{
+			v = FindVisualizor(type);
+			cachedVisualizer[type] = v;
+		}
+		return v;
+	}
+
+	private DataVisualizer FindVisualizor(Type type)
+	{
 		if (type.IsPrimitive)
-			return primitiveVisualizer;
+			return primitiveAndNullVisualizer;
 
 		if (type.IsEnum)
 			return enumVisualizer;
