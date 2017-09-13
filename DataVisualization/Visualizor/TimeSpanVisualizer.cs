@@ -1,34 +1,37 @@
 ﻿using System;
 using UnityEditor;
 
-internal class TimeSpanVisualizer : DataVisualizer
+namespace DataTools
 {
-	public override bool HasChildren()
+	internal class TimeSpanVisualizer : DataVisualizer
 	{
-		return false;
-	}
-
-    public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
-    {
-		var span = (TimeSpan)data;
-
-		string oldstrdate = span.ToString();
-		string str = EditorGUILayout.TextField(name, oldstrdate);
-		if (oldstrdate != str)
-			span = ParseTimeSpan(str, span);
-
-		return ApplyValueIfNotEqual(ref data, span);
-    }
-
-	private TimeSpan ParseTimeSpan(string str, TimeSpan defaultValue)
-	{
-		try
+		public override bool HasChildren()
 		{
-			return TimeSpan.Parse(str);
+			return false;
 		}
-		catch (Exception)
+
+		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
 		{
-			return defaultValue;
+			var span = (TimeSpan) data;
+
+			string oldstrdate = span.ToString();
+			string str = EditorGUILayout.TextField(name, oldstrdate);
+			if (oldstrdate != str)
+				span = ParseTimeSpan(str, span);
+
+			return ApplyValueIfNotEqual(ref data, span);
+		}
+
+		private TimeSpan ParseTimeSpan(string str, TimeSpan defaultValue)
+		{
+			try
+			{
+				return TimeSpan.Parse(str);
+			}
+			catch (Exception)
+			{
+				return defaultValue;
+			}
 		}
 	}
 }

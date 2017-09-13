@@ -13,11 +13,6 @@ namespace DataTools
 
 		////////////////////////////////////
 		// list
-		public static bool IsSubclassOfList(Type type)
-		{
-			return FindGenerticAncestor(type, ListGenericType) != null;
-		}
-
 		public static Type GetListValueType(Type type)
 		{
 			return FindGenerticAncestor(type, ListGenericType).GetGenericArguments()[0];

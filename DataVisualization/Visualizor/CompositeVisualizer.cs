@@ -1,74 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using DataTools;
 
-internal class CompositeVisualizer : DataVisualizer
+namespace DataTools
 {
-	public override bool HasChildren()
+	internal class CompositeVisualizer : DataVisualizer
 	{
-		return true;
-	}
-
-	public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
-	{
-		var fields = new List<FieldInfo>();
-
-		if (visualization.options.showStaticFields)
+		public override bool HasChildren()
 		{
-			AppendFields(fields, type, BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-			if (visualization.options.showNonPublicFields)
-				AppendFields(fields, type, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+			return true;
 		}
 
-		AppendFields(fields, type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-		if (visualization.options.showNonPublicFields)
-			AppendFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-
-		if (visualization.options.sortFields)
-			fields.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-
-		bool changed = false;
-		foreach (var fieldInfo in fields)
+		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
 		{
-			changed |= InspectField(visualization, path, ref data, fieldInfo, "");
-		}
-		return changed;
-	}
+			var fields = new List<FieldInfo>();
 
-	// 添加相关Fields。但是特别的是，基类的属性在派生类之前
-	private static void AppendFields(List<FieldInfo> fields, Type type, BindingFlags bindingFlags)
-	{
-		if (type.BaseType != typeof(object) && type != typeof(object))
-		{
-			AppendFields(fields, type.BaseType, bindingFlags);
-		}
-		fields.AddRange(type.GetFields(bindingFlags | BindingFlags.DeclaredOnly));
-	}
-
-	private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldInfo fieldInfo, string prefix)
-	{
-		object value = fieldInfo.GetValue(data);
-		FieldInfo info = fieldInfo;
-		bool inwritable = info.IsInitOnly || info.IsLiteral;
-		Type valueType = value != null ? value.GetType() : info.FieldType;
-
-		bool changed = false;
-		object changedvalue = null;
-		var mark = TypeTools.GetAttribute<IMark>(info);
-		if (inwritable)
-			visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
-		else
-			visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark, v =>
+			if (visualization.options.showStaticFields)
 			{
-				changed = true;
-				changedvalue = v;
-			});
+				AppendFields(fields, type, BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+				if (visualization.options.showNonPublicFields)
+					AppendFields(fields, type, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+			}
 
-		if (changed)
-		{
-			info.SetValue(data, changedvalue);
+			AppendFields(fields, type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+			if (visualization.options.showNonPublicFields)
+				AppendFields(fields, type, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+
+			if (visualization.options.sortFields)
+				fields.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+
+			bool changed = false;
+			foreach (var fieldInfo in fields)
+			{
+				changed |= InspectField(visualization, path, ref data, fieldInfo, "");
+			}
+			return changed;
 		}
-		return changed;
+
+		// 添加相关Fields。但是特别的是，基类的属性在派生类之前
+		private static void AppendFields(List<FieldInfo> fields, Type type, BindingFlags bindingFlags)
+		{
+			if (type.BaseType != typeof (object) && type != typeof (object))
+			{
+				AppendFields(fields, type.BaseType, bindingFlags);
+			}
+			fields.AddRange(type.GetFields(bindingFlags | BindingFlags.DeclaredOnly));
+		}
+
+		private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldInfo fieldInfo,
+			string prefix)
+		{
+			object value = fieldInfo.GetValue(data);
+			FieldInfo info = fieldInfo;
+			bool inwritable = info.IsInitOnly || info.IsLiteral;
+			Type valueType = value != null ? value.GetType() : info.FieldType;
+
+			bool changed = false;
+			object changedvalue = null;
+			var mark = TypeTools.GetAttribute<IMark>(info);
+			if (inwritable)
+				visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
+			else
+				visualization.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark, v =>
+				{
+					changed = true;
+					changedvalue = v;
+				});
+
+			if (changed)
+			{
+				info.SetValue(data, changedvalue);
+			}
+			return changed;
+		}
 	}
 }

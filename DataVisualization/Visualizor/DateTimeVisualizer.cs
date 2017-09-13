@@ -2,77 +2,82 @@
 using System.Globalization;
 using UnityEditor;
 
-internal class DateTimeVisualizer : DataVisualizer
+namespace DataTools
 {
-	private readonly static DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Utc);
-
-	public override string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+	internal class DateTimeVisualizer : DataVisualizer
 	{
-		var time = (DateTime)data;
-		return " " + time.Kind;
-	}
+		private static readonly DateTime CTIME_BEGIN = DateTime.SpecifyKind(new DateTime(1970, 1, 1), DateTimeKind.Utc);
 
-	public override bool HasChildren()
-	{
-		return true;
-	}
+		public override string GetLabelPostfix(DataVisualization visualization, object data, Type type)
+		{
+			var time = (DateTime) data;
+			return " " + time.Kind;
+		}
 
-	public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
-	{
-		var time = (DateTime)data;
+		public override bool HasChildren()
+		{
+			return true;
+		}
 
-		string oldstrdate = time.ToString(CultureInfo.CurrentCulture);
-		string strdate = EditorGUILayout.TextField(oldstrdate);
-		if (oldstrdate != strdate)
-			time = ParseDateTime(strdate, time.Kind, time);
+		public override bool InspectSelf(DataVisualization visualization, string name, ref object data, Type type)
+		{
+			var time = (DateTime) data;
 
-		return ApplyValueIfNotEqual(ref data, time);
-	}
+			string oldstrdate = time.ToString(CultureInfo.CurrentCulture);
+			string strdate = EditorGUILayout.TextField(oldstrdate);
+			if (oldstrdate != strdate)
+				time = ParseDateTime(strdate, time.Kind, time);
 
-	public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
-	{
-		var time = (DateTime)data;
-		EditorGUILayout.LabelField("Unix Time Stamp", ToUnixTimestampString(time));
+			return ApplyValueIfNotEqual(ref data, time);
+		}
 
-		var ticks = EditorGUILayout.LongField("Ticks", time.Ticks);
-		var kind = (DateTimeKind) EditorGUILayout.EnumPopup("Kind", time.Kind);
-		if (ticks != time.Ticks || kind != time.Kind)
+		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		{
+			var time = (DateTime) data;
+			EditorGUILayout.LabelField("Unix Time Stamp", ToUnixTimestampString(time));
+
+			var ticks = EditorGUILayout.LongField("Ticks", time.Ticks);
+			var kind = (DateTimeKind) EditorGUILayout.EnumPopup("Kind", time.Kind);
+			if (ticks != time.Ticks || kind != time.Kind)
+			{
+				try
+				{
+					data = new DateTime(ticks, kind);
+					return true;
+				}
+				catch (Exception)
+				{
+				}
+			}
+
+			return false;
+		}
+
+		private DateTime ParseDateTime(string time, DateTimeKind kind, DateTime defaultValue)
 		{
 			try
 			{
-				data = new DateTime(ticks, kind);
-				return true;
+				return new DateTime(DateTime.Parse(time).Ticks, kind);
 			}
-			catch (Exception){}
+			catch (Exception)
+			{
+				return defaultValue;
+			}
 		}
 
-		return false;
-	}
-
-	private DateTime ParseDateTime(string time, DateTimeKind kind, DateTime defaultValue)
-	{
-		try
+		private static string ToUnixTimestampString(DateTime time)
 		{
-			return new DateTime(DateTime.Parse(time).Ticks, kind);
-		}
-		catch (Exception)
-		{
-			return defaultValue;
-		}
-	}
-
-	private static string ToUnixTimestampString(DateTime time)
-	{
-		time = time.ToUniversalTime();
-		if (time >= CTIME_BEGIN)
-		{
-			var ts = time.Subtract(CTIME_BEGIN);
-			var ctime = (uint) ts.TotalSeconds;
-			return ctime.ToString(CultureInfo.InvariantCulture);
-		}
-		else
-		{
-			return "[Bad date: Under 1970 UTC]";
+			time = time.ToUniversalTime();
+			if (time >= CTIME_BEGIN)
+			{
+				var ts = time.Subtract(CTIME_BEGIN);
+				var ctime = (uint) ts.TotalSeconds;
+				return ctime.ToString(CultureInfo.InvariantCulture);
+			}
+			else
+			{
+				return "[Bad date: Under 1970 UTC]";
+			}
 		}
 	}
 }

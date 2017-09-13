@@ -1,7 +1,4 @@
-﻿using FF;
-using UnityEngine;
-
-#pragma warning disable 414
+﻿#pragma warning disable 414
 
 public class TestClass
 {

@@ -2,69 +2,72 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DataTools;
 
-internal class StaticVisualizer : DataVisualizer
+namespace DataTools
 {
-	private class FieldData
+	internal class StaticVisualizer : DataVisualizer
 	{
-		public FieldInfo field;
-		public IMark mark;
-	}
-	private static readonly Dictionary<Type, FieldData[]> cachedFields = new Dictionary<Type, FieldData[]>();
-
-	private static FieldData[] GetFieldInfos(Type type)
-	{
-		if (!cachedFields.ContainsKey(type))
+		private class FieldData
 		{
-			var fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public).OrderBy(o => o.Name).ToArray();
-			var data = new FieldData[fieldInfos.Length];
+			public FieldInfo field;
+			public IMark mark;
+		}
 
-			for (int i = 0; i < fieldInfos.Length; i++)
+		private static readonly Dictionary<Type, FieldData[]> cachedFields = new Dictionary<Type, FieldData[]>();
+
+		private static FieldData[] GetFieldInfos(Type type)
+		{
+			if (!cachedFields.ContainsKey(type))
 			{
-				data[i] = new FieldData
+				var fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public).OrderBy(o => o.Name).ToArray();
+				var data = new FieldData[fieldInfos.Length];
+
+				for (int i = 0; i < fieldInfos.Length; i++)
 				{
-					field = fieldInfos[i],
-					mark = TypeTools.GetAttribute<IMark>(fieldInfos[i])
-				};
+					data[i] = new FieldData
+					{
+						field = fieldInfos[i],
+						mark = TypeTools.GetAttribute<IMark>(fieldInfos[i])
+					};
+				}
+				cachedFields.Add(type, data);
 			}
-			cachedFields.Add(type, data);
+			return cachedFields[type];
 		}
-		return cachedFields[type];
-	}
 
-	public override bool HasChildren()
-	{
-		return true;
-	}
-
-	public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
-	{
-		var dataAsType = data as Type;
-		if (dataAsType == null)
-			return false;
-
-		bool changed = false;
-		foreach (FieldData field in GetFieldInfos(dataAsType))
+		public override bool HasChildren()
 		{
-			changed |= InspectField(visualization, path + "." + field.field.Name, ref data, field);
+			return true;
 		}
-		return changed;
-	}
 
-	private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldData fieldInfo)
-	{
-		bool changed = false;
-		object newValue = null;
-		visualization.Inspect(fieldInfo.field.Name, path, fieldInfo.field.GetValue(null), fieldInfo.field.FieldType,
-			fieldInfo.mark, v =>
+		public override bool InspectChildren(DataVisualization visualization, string path, ref object data, Type type)
+		{
+			var dataAsType = data as Type;
+			if (dataAsType == null)
+				return false;
+
+			bool changed = false;
+			foreach (FieldData field in GetFieldInfos(dataAsType))
 			{
-				changed = true;
-				newValue = v;
-			});
+				changed |= InspectField(visualization, path + "." + field.field.Name, ref data, field);
+			}
+			return changed;
+		}
 
-		if (changed)
-			fieldInfo.field.SetValue(data, newValue);
-		return changed;
+		private static bool InspectField(DataVisualization visualization, string path, ref object data, FieldData fieldInfo)
+		{
+			bool changed = false;
+			object newValue = null;
+			visualization.Inspect(fieldInfo.field.Name, path, fieldInfo.field.GetValue(null), fieldInfo.field.FieldType,
+				fieldInfo.mark, v =>
+				{
+					changed = true;
+					newValue = v;
+				});
+
+			if (changed)
+				fieldInfo.field.SetValue(data, newValue);
+			return changed;
+		}
 	}
 }
