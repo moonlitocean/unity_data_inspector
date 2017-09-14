@@ -90,6 +90,8 @@ namespace DataInspector
 
 		public void RemoveAllVisualizers()
 		{
+			AssertValidSetupState();
+
 			rules.Clear();
 			markRules.Clear();
 		}
@@ -97,7 +99,7 @@ namespace DataInspector
 		public VisualizerBase GetVisualizer(Type type)
 		{
 			if (type == null)
-				throw new ArgumentNullException();
+				throw new ArgumentNullException("type");
 
 			if (rules.ContainsKey(type))
 				return rules[type];
@@ -107,8 +109,11 @@ namespace DataInspector
 
 		public void SetVisualizer(Type type, VisualizerBase income)
 		{
-			if (type == null || income == null)
-				throw new ArgumentNullException();
+			if (type == null)
+				throw new ArgumentNullException("type");
+			if (income == null)
+				throw new ArgumentNullException("income");
+			AssertValidSetupState();
 
 			if (type.GetInterface(typeof (IMark).Name) != null)
 				markRules[type] = income;
@@ -119,7 +124,8 @@ namespace DataInspector
 		public void RemoveVisualizer(Type type)
 		{
 			if (type == null)
-				throw new ArgumentException();
+				throw new ArgumentNullException("type");
+			AssertValidSetupState();
 
 			if (rules.ContainsKey(type))
 				rules.Remove(type);
@@ -146,7 +152,8 @@ namespace DataInspector
 		public void SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 		{
 			if (income == null)
-				throw new ArgumentException();
+				throw new ArgumentNullException("income");
+			AssertValidSetupState();
 
 			switch (type)
 			{
@@ -223,7 +230,6 @@ namespace DataInspector
 			return changed;
 		}
 
-
 		private bool InspectRoot(string name, Type type, ref object data, VisualizerBase visualizer, IMark mark)
 		{
 			using (new EditorGUILayout.HorizontalScope())
@@ -274,9 +280,9 @@ namespace DataInspector
 		//  * type.isPrimitive
 		//  * type.isEnum
 		//  * Registered concrete type that equals to the current type
-		//  * Registered type that is the first matched base type or generice base type
-		//		Concrete type first, dont support partially binded type
-		//  * Registered interface that is the interface of current type
+		//  * Registered type that is the first matched exact type or generice base type to a ancestor
+		//		Exact type first
+		//  * Registered interface
 		//		If multiply interfaces match, the result is unspecified, depend on the sequence of GetInterfaces()
 		//  * Finally, if no visualizer is matched, return composite visualizer
 		private VisualizerBase GetVisualizor(Type type, IMark mark)
@@ -360,6 +366,12 @@ namespace DataInspector
 			}
 
 			return null;
+		}
+
+		private static void AssertValidSetupState()
+		{
+			if (cachedVisualizer.Count != 0)
+				throw new InvalidOperationException("Can not setup visualizer after Inspect()");
 		}
 	}
 }
