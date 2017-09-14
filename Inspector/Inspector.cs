@@ -39,6 +39,7 @@ namespace DataInspector
 		private VisualizerBase enumVisualizer;
 		private readonly Dictionary<Type, VisualizerBase> rules = new Dictionary<Type, VisualizerBase>();
 		private readonly Dictionary<Type, VisualizerBase> markRules = new Dictionary<Type, VisualizerBase>();
+		private readonly Stack<bool> parentIsAlwaysShow = new Stack<bool>();
 
 		public Inspector()
 		{
@@ -192,7 +193,10 @@ namespace DataInspector
 
 				if (visualizer.HasChildren())
 				{
-					bool alwaysShowChildren = visualizer.AlwaysShowChildren();
+					// Note: to avoid infinite expand that may cause by alwaysShowChildren,
+					// If parentAlwaysShowChild, then current node ignores alwaysShowChildren.
+					var parentAlwaysShowChild = parentIsAlwaysShow.Count > 0 && parentIsAlwaysShow.Peek();
+					bool alwaysShowChildren = !parentAlwaysShowChild && visualizer.AlwaysShowChildren();
 					if (!alwaysShowChildren)
 					{
 						using (new EditorGUILayout.HorizontalScope())
@@ -212,9 +216,17 @@ namespace DataInspector
 
 					if (changedData != null && (alwaysShowChildren || isFoldout[path]))
 					{
-						EditorGUI.indentLevel++;
-						changed |= visualizer.InspectChildren(this, path, ref changedData, type);
-						EditorGUI.indentLevel--;
+						try
+						{
+							parentIsAlwaysShow.Push(alwaysShowChildren);
+							EditorGUI.indentLevel++;
+							changed |= visualizer.InspectChildren(this, path, ref changedData, type);
+						}
+						finally
+						{
+							EditorGUI.indentLevel--;
+							parentIsAlwaysShow.Pop();
+						}
 					}
 				}
 				else
