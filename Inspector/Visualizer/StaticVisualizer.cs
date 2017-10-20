@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEditor;
 
 namespace DataInspector
 {
@@ -40,7 +41,18 @@ namespace DataInspector
 			return true;
 		}
 
-		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
+        public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
+        {
+            var dataAsType = data as Type;
+            if (dataAsType != null)
+            {
+                EditorGUILayout.LabelField(string.Concat("Type: ", dataAsType.FullName));
+                return false;
+            }
+            return base.InspectSelf(inspector, name, ref data, type);
+        }
+
+        public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var dataAsType = data as Type;
 			if (dataAsType == null)
