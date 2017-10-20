@@ -7,7 +7,7 @@ Inspect/Edit any data from Editor script through reflection, supports tolua. Hig
 
 功能由下面两个文件夹的.cs 代码实现，拷贝到自己的工程即可。
 
-. | 功能
+文件夹 | 功能
 -|-
 Inspector  | 主功能，支持C# 和 Unity 对象
 Inspector_tolua_extension | [tolua](https://github.com/topameng/tolua) 插件，支持tolua1.0，目前只支持 LuaTable
@@ -16,11 +16,11 @@ Inspector_tolua_extension | [tolua](https://github.com/topameng/tolua) 插件，
 
 对于每个范例，需要首先执行 mklink.cmd，他会引用 Inspector / Inspector_tolua_extension 代码。
 
-. | 范例
-- | -
+文件夹 | 范例
+-|-
 Example0_BasicUse | 基本的功能展示
 Example1_CustomType | 对自定义类型，添加自定义的查看逻辑
-Example2_tolua | 显示 tolua 的 LuaTable 内容
+Example2_tolua | tolua 支持，目前只支持 LuaTable
 
 # 特性
 
