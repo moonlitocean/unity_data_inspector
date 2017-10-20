@@ -1,6 +1,7 @@
 Temp
 Library
 LinkToInspector
+LinkToInspector_tolua_extension
 CustomVisualizor
 ProjectSettings
 *.meta
