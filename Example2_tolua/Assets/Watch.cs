@@ -13,8 +13,10 @@ public class Watch : EditorWindow
 		// Note: Awake() will be called after Unity recompile.
 		//	The most safe place to setup v is here.
 
+		// Open extension. Only need open once
+		Inspector.OpenToLua();
+		
 		inspector = new Inspector();
-		inspector.SetVisualizer(typeof(LuaTable), new LuaTableVisualizer());
 	}
 
 	[MenuItem("Window/Watch")]

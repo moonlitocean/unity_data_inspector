@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace DataInspector
 {
-	public class Inspector
+	public partial class Inspector
 	{
 		public enum SpecialVisualizer
 		{
@@ -40,6 +40,10 @@ namespace DataInspector
 		private readonly Dictionary<Type, VisualizerBase> rules = new Dictionary<Type, VisualizerBase>();
 		private readonly Dictionary<Type, VisualizerBase> markRules = new Dictionary<Type, VisualizerBase>();
 		private readonly Stack<bool> parentIsAlwaysShow = new Stack<bool>();
+
+		///////////////////////////////////////////////////////////////
+		// Extra init step
+		private static readonly Dictionary<string, Action<Inspector>> OnRegisterDefaultVisualizers = new Dictionary<string, Action<Inspector>>();
 
 		public Inspector()
 		{
@@ -87,6 +91,10 @@ namespace DataInspector
 
 			// Markers
 			markRules.Add(typeof (UnixTimestampAttribute), new UnixTimeStampVisualizer());
+			
+			// Extension
+			foreach (var extension in OnRegisterDefaultVisualizers)
+				extension.Value(this);
 		}
 
 		public void RemoveAllVisualizers()
