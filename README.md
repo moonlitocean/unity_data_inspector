@@ -26,7 +26,9 @@ Example2_tolua | tolua 支持，目前只支持 LuaTable
 
 ## 自定义展示器
 
-查看器每处理一个数据时，会根据其Type注册的 Visualizer 展示其数据内容。 默认情况下已经注册了一批的展示器，可以良好地处理Unity和C#内容。 所有的默认查看器，用户都能自己实现。 用户除了可以添加新的展示器外，还可以通过 RemoveAllVisualizers 等功能修改或者移除所有预注册的展示器。
+查看器根据数据类型找到注册的Visualizer展示内容。查看器已经预注册了一批的展示器，可以良好地处理Unity和C#内容。用户可以添加新的展示器，还可以修改或者移除所有预注册的展示器。
+
+> 注意: 你需要在调用 Inspect() 之前执行所有定制注册。 查看器内部有一个类型缓存，不会及时刷新。
 
 ```c#
 class MyVisualizer : VisualizerBase { /**/ }
@@ -41,20 +43,18 @@ ins.GetSpecialVisualizer(SpecialVisualizer type)
 ins.SetSpecialVisualizer(SpecialVisualizer type, VisualizerBase income)
 ```
 
-有时候，你希望更精确地控制查看器的匹配。 例如，整数一般使用整数查看器，但是某个整数为unix时间戳，我们希望查看时能显示时间；又或者希望标记某个string 为本地化文本 (然后就可以在展示器中将 "skill.101.name" 翻译成 "Rocket Punch" 或者 "火箭飞弹" )。 这个时候，你可以字段上添加 Attribute，然后定义标签对应的查看器。
+当用户需要精确控制匹配时，可以自定义Attribute。 例如，整数一般使用整数查看器，但是某个整数为unix时间戳，我们希望查看时能显示时间；又或者希望标记某个string 为本地化文本，于是就可以在展示器中将 "skill.101.name" 翻译成 "Rocket Punch" 或者 "火箭飞弹" 。 这个时候，你可以字段上添加 Attribute，然后定义Attribute对应的查看器。
 
 ```c#
 [UnixTimestamp]int time;
 [Locale]string skill_name;
 ```
 
-> 注意: 你需要在调用 Inspect() 之前执行所有定制注册。 否则查看器内部的类型缓存，可能不会更新。
+### 展示器的匹配顺序
 
-### Visualizer 的匹配顺序
+当遇到一个类型时，系统按如下的顺序找到匹配的查看器 Visualizer：
 
-当遇到一个类型时，系统按如下的顺序找到匹配的查看器：
-
-* 字段上有 IMark Attribute
+* 字段上有派生自 IMark Attribute
 * null -> SpecialVisualizer.PrimitiveAndNull
 * enum -> SpecialVisualizer.Enum
 * 注册的 type 是一个精确匹配
