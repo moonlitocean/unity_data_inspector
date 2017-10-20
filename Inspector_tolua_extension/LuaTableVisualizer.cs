@@ -56,6 +56,12 @@ namespace DataInspector
                 inspector.Inspect(e.Current.Key.ToString(), path + "." + e.Current.Key, e.Current.Value);
             }
 
+            var metatable = curTable.GetMetaTable();
+            if (metatable != null)
+            {
+                inspector.Inspect(".metatable", path + "." + ".metatable", metatable);
+            }
+
             e = _others.GetEnumerator();
             while (e.MoveNext())
             {
