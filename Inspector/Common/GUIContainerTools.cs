@@ -1,32 +1,29 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace DataInspector
 {
 	public static class GUIContainerTools
 	{
+		public interface IDictParser
+		{
+			int Size(object collection);
+			object[] Keys(object collection);
+			object Get(object dict, object key);
+			bool Set(object dict, object key, object value);		// 如果数据发生了改变，那么返回true
+			Type ValueType(object dict);
+			bool Resizable(object collection);						// 如果Resizable为false，则不需要实现Resize
+			object Resize(object collection, int size);				// 返回新大小的容器（可以是自己）
+		}
+
 		private class DictionaryDisplay
 		{
-			public readonly object[] keys;			// 原始key列表，用于判断Dictionary是否变化。如果不需要判断，则可以为null
-			public readonly object[] sorted;		// 排序过的key，用于显示。
-			public readonly string[] cachedGroupTitles;
-
-			public DictionaryDisplay(IDictionary dict)
-			{
-				keys = GetKeys(dict);
-				sorted = Sorted(keys);
-				cachedGroupTitles = BuildGroupTitles(dict, sorted);
-			}
-
-			public DictionaryDisplay(IDictionary dict, object[] sorted)
-			{
-				keys = null;
-				this.sorted = sorted;
-				cachedGroupTitles = BuildGroupTitles(dict, sorted);
-			}
+			public int bucketSize;
+			public object[] keys;				// 原始key列表，用于判断Dictionary是否变化。如果不需要判断，则可以为null
+			public object[] resultKeys;			// 过滤、排序过的key，用于显示。
 		}
 
 		private class SearchInputState
@@ -44,49 +41,57 @@ namespace DataInspector
 
 		private class DictionaryGUIState
 		{
-			public object target;			// 实际的字典
-			public IDictionary data;		// 数据，可能是复制的
+			public object dict;			// 实际的字典（抽象的key-value对）
+			public IDictParser parser;	// 字典对应的解析器
 
-			public DictionaryDisplay display;
 			public SearchInputState searchInput;
-			public DictionaryDisplay searchResult;
+			public DictionaryDisplay display;
+
+			public int Size() { return parser.Size(dict); }
+			public object[] Keys() { return parser.Keys(dict); }
+			public object Get(object key) { return parser.Get(dict, key); }
+			public bool Set(object key, object value) { return parser.Set(dict, key, value); }
+			public Type ValueType() {return parser.ValueType(dict);}
+			public bool Resizeable(){return parser.Resizable(dict);}
+			public object Resize(int size){return parser.Resize(dict, size);}
 		}
 
-		private const int GroupElemsCount = 100;
 		private static readonly Dictionary<WeakReference, DictionaryGUIState> guiCache = new Dictionary<WeakReference, DictionaryGUIState>();
 		private static DateTime lastCacheRecycleCheck;
 
-		// 如果数据发生了修改，则返回true
-		// bool EditItem(key, value) 返回数据项是否发生了修改
-		public static bool EditElems(IDictionary dict, Func<object, object, bool> EditItem, Dictionary<string, bool> foldout, string foldoutRoot)
-		{
-			return EditDictionaryElems(dict, EditItem, foldout, foldoutRoot);
-		}
-
-		//////////////////////////////////////////////////////////////////////////////////////////////////
-		// 实现
-		private static bool EditDictionaryElems(object dict, Func<object, object, bool> EditItem, Dictionary<string, bool> foldout, string foldoutRoot)
+		// 如果数据发生了修改，则返回true。
+		//
+		// parser用于解析dict对象
+		public static bool EditDict(Inspector inspector, string path, object dict, IDictParser parser)
 		{
 			UpdateCheck();
-			DictionaryGUIState state = GetCachedDictionaryState(dict);
-			PrepareData(state);
 
+			DictionaryGUIState state = GetOrCreateCachedState(dict, parser);
 			DrawSearchInput(state);
-			if (state.searchInput.changed)
-			{
-				RebuildSearchResult(state);
-			}
+			RebuildDisplayIfNeed(state, inspector.options.listBucketSize);
 
-			if (state.searchResult != null)
+			return Traversal(inspector, path, state, 0, state.display.resultKeys.Length);
+		}
+
+		private static void RebuildDisplayIfNeed(DictionaryGUIState state, int bucketSize)
+		{
+			if (state.display == null || state.searchInput.changed || IsKeyChanged(state) || state.display.bucketSize != bucketSize)
 			{
-				EditorGUILayout.LabelField(string.Format("{0} Errors：", state.searchResult.sorted.Length));
-				return ShowGrouped(state.data, EditItem, foldout, foldoutRoot, state.searchResult);
+				var display = new DictionaryDisplay();
+				display.keys = state.Keys();
+				display.bucketSize = bucketSize;
+
+				if (!string.IsNullOrEmpty(state.searchInput.text))
+					display.resultKeys = Sorted(FilterKeys(display.keys, state.searchInput));
+				else
+					display.resultKeys = Sorted(display.keys);
+				state.display = display;
 			}
-			else
-			{
-				UpdateDisplay(state);
-				return ShowGrouped(state.data, EditItem, foldout, foldoutRoot, state.display);
-			}
+		}
+
+		private static bool IsKeyChanged(DictionaryGUIState state)
+		{
+			return state.display != null && !ArrayEqual(state.display.keys, state.Keys());
 		}
 
 		private static void DrawSearchInput(DictionaryGUIState state)
@@ -97,7 +102,7 @@ namespace DataInspector
 			var now = DateTime.Now;
 			SearchInputState input = state.searchInput;
 			using (GUITools.Indent())
-			using (new EditorGUILayout.HorizontalScope("box"))
+			using (new GUILayout.HorizontalScope("box"))
 			{
 				var newInput = EditorGUILayout.TextField("Search: ", input.text);
 				if (newInput != input.text)
@@ -131,39 +136,15 @@ namespace DataInspector
 			}
 		}
 
-		private static void UpdateDisplay(DictionaryGUIState state)
+		private static object[] FilterKeys(object[] keys, SearchInputState search)
 		{
-			if (state.display == null || !IsKeyEquals(state.data, state.display.keys))
+			if (!string.IsNullOrEmpty(search.filter))
 			{
-				state.display = new DictionaryDisplay(state.data);
+				return keys
+					.Where(o => o != null && o.ToString().IndexOf(search.filter, StringComparison.Ordinal) != -1)
+					.ToArray();
 			}
-		}
-
-		private static void RebuildSearchResult(DictionaryGUIState guiState)
-		{
-			guiState.searchResult = null;
-
-			if (!string.IsNullOrEmpty(guiState.searchInput.filter))
-			{
-				var startWith = new List<object>();
-				var inMiddle = new List<object>();
-				foreach (var key in Sorted(GetKeys(guiState.data)))
-				{
-					var strKey = key.ToString();
-					var index = strKey.IndexOf(guiState.searchInput.filter, StringComparison.Ordinal);
-					if (index == -1)
-						continue;
-
-					if (strKey == guiState.searchInput.filter)
-						startWith.Insert(0, key);
-					else if (index == 0)
-						startWith.Add(key);
-					else
-						inMiddle.Add(key);
-				}
-
-				guiState.searchResult = new DictionaryDisplay(guiState.data, startWith.Concat(inMiddle).ToArray());
-			}
+			return keys;
 		}
 
 		private static void UpdateCheck()
@@ -184,7 +165,7 @@ namespace DataInspector
 			}
 		}
 
-		private static DictionaryGUIState GetCachedDictionaryState(object dict)
+		private static DictionaryGUIState GetOrCreateCachedState(object dict, IDictParser parser)
 		{
 			var weakKey = guiCache.FirstOrDefault(o => o.Key.Target == dict).Key;
 			if (weakKey == null)
@@ -192,80 +173,79 @@ namespace DataInspector
 				weakKey = new WeakReference(dict);
 				guiCache[weakKey] = new DictionaryGUIState
 				{
-					target = dict
+					dict = dict,
+					parser = parser,
 				};
 			}
 
 			return guiCache[weakKey];
 		}
 
-		private static bool ShowGrouped(IDictionary dict, Func<object, object, bool> EditItem, Dictionary<string, bool> foldout, string foldoutRoot, DictionaryDisplay cache)
+		private static bool Traversal(Inspector inspector, string path, DictionaryGUIState state, int start, int end)
 		{
 			bool changed = false;
-			object[] keys = cache.sorted;
-			if (dict.Count <= GroupElemsCount)
+			var bucketSize = Math.Max(state.display.bucketSize, 2);
+			var valueType = state.ValueType();
+
+			if (end - start <= bucketSize)
 			{
-				foreach (object key in keys)
+				for (int index = start; index < end; ++index)
 				{
-					changed |= EditItem(key, dict[key]);
+					changed |= InspectElement(inspector, path, state.display.resultKeys[index], state, valueType);
 				}
 			}
 			else
 			{
-				for (int i = 0; i < keys.Length; i += GroupElemsCount)
-				{
-					string groupTitle = cache.cachedGroupTitles[i / GroupElemsCount];
-					string foldkey = foldoutRoot + "." + groupTitle;
-					if (!foldout.ContainsKey(foldkey))
-					{
-						foldout[foldkey] = false;
-					}
-					foldout[foldkey] = GUITools.Foldout(foldout[foldkey], groupTitle, true);
+				// Allow multiple level of bucket, calculate the current step
+				int step = bucketSize;
+				while (step * bucketSize < end - start)
+					step *= bucketSize;
 
-					if (foldout[foldkey])
+				for (int inner = start; inner < end; inner += step)
+				{
+					int innerEnd = Math.Min(end, inner + step);
+
+					var innerKeyBegin = state.display.resultKeys[inner];
+					var innerKeyEnd = state.display.resultKeys[innerEnd - 1];
+					var label = FormatKeyRange(innerKeyBegin, innerKeyEnd);
+					var foldoutPath = path + "[" + innerKeyBegin + "~" + innerKeyEnd + "]";
+
+					inspector.isFoldout[foldoutPath] = GUITools.Foldout(inspector.isFoldout.ContainsKey(foldoutPath) && inspector.isFoldout[foldoutPath], label, true);
+					if (inspector.isFoldout[foldoutPath])
 					{
-						++EditorGUI.indentLevel;
-						for (int index = 0; index < GroupElemsCount && i + index < keys.Length; index++)
+						using (GUITools.Indent())
 						{
-							var key = keys[i + index];
-							changed |= EditItem(key, dict[key]);
+							changed |= Traversal(inspector, path, state, inner, innerEnd);
 						}
-						--EditorGUI.indentLevel;
 					}
 				}
 			}
+
 			return changed;
+		}
+
+		private static bool InspectElement(Inspector inspector, string path, object key, DictionaryGUIState state, Type dictValueType)
+		{
+			object value = state.Get(key);
+			Type valueType = value != null ? value.GetType() : dictValueType;
+			string extraTypeInfo = string.Empty;
+			if (valueType != dictValueType)
+			{
+				extraTypeInfo = string.Format("   ({0})", valueType.Name);
+			}
+			string name = key != null ? CutName(key.ToString()) : "null";
+			return inspector.Inspect(name + extraTypeInfo, path + "." + name, value, valueType, null, v => state.Set(key, v));
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// cache的工具函数
-		private static void PrepareData(DictionaryGUIState state)
+		private static bool ArrayEqual(object[] l, object[] r)
 		{
-			if (state.target is IDictionary)
-			{
-				state.data = state.target as IDictionary;
-			}
-		}
-
-		private static object[] GetKeys(IDictionary dict)
-		{
-			var keys = new object[dict.Count];
-			int index = 0;
-			foreach (object key in dict.Keys)
-			{
-				keys[index++] = key;
-			}
-			return keys;
-		}
-
-		private static bool IsKeyEquals(IDictionary dict, object[] keys)
-		{
-			if (dict.Count != keys.Length)
+			if (l.Length != r.Length)
 				return false;
-			int index = 0;
-			foreach (object key in dict.Keys)
+			for (var i = 0; i < l.Length; i++)
 			{
-				if (index >= keys.Length || keys[index++] != key)
+				if(l[i] != r[i])
 					return false;
 			}
 			return true;
@@ -273,16 +253,6 @@ namespace DataInspector
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// ui key rules
-		private static string[] BuildGroupTitles(IDictionary dict, object[] sorted)
-		{
-			string[] result = new string[(sorted.Length - 1) / GroupElemsCount + 1];
-			for (int i = 0; i < sorted.Length; i += GroupElemsCount)
-			{
-				result[i / GroupElemsCount] = FormatKeyRange(dict, sorted[i], sorted[Math.Min(i + GroupElemsCount - 1, sorted.Length - 1)]);
-			}
-			return result;
-		}
-
 		private static object[] Sorted(object[] keys)
 		{
 			bool isInt = false;
@@ -320,37 +290,21 @@ namespace DataInspector
 			return result;
 		}
 
-		private static string FormatKeyRange(IDictionary dict, object begin, object end)
+		private static string FormatKeyRange(object begin, object end)
 		{
-			if (IsPrintable(dict[begin]) && IsPrintable(dict[end]))
-				return String.Format("{0,-50}  {1,-50}", CutName(begin), CutName(dict[begin]));
-			else
-				return String.Format("{0}", CutName(begin));
-		}
-
-		private static string FormatKeyRange<T>(IList<T> items, int begin, int end)
-		{
-			if (IsPrintable(items[begin]) && IsPrintable(items[end]))
-				return String.Format("{0,-50}  {1,-50}", begin, CutName(items[begin]));
-			else
-				return String.Format("{0}", begin);
-		}
-
-		private static bool IsPrintable<T>(T item)
-		{
-			return item is int || item is string;
+			return CutName(begin) + ", ...";
 		}
 
 		private static string CutName(object key)
 		{
-			string s = key.ToString();
+			string s = key != null ? key.ToString() : "null";
 			if (s.IndexOf('\n') != -1)
 				s = s.Replace("\n", "");
 
-			if (s.Length <= 50)
+			if (s.Length <= 27)
 				return s;
 			else
-				return s.Substring(0, 25) + "..." + s.Substring(s.Length - 25);
+				return s.Substring(0, 12) + "..." + s.Substring(s.Length - 12);
 		}
 	}
 }

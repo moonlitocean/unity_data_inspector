@@ -13,6 +13,10 @@ namespace DataInspector
 
 		////////////////////////////////////
 		// list
+		public static bool IsSubclassOfList(Type type)
+		{
+			return FindGenerticAncestor(type, ListGenericType) != null;
+		}
 		public static Type GetListValueType(Type type)
 		{
 			return FindGenerticAncestor(type, ListGenericType).GetGenericArguments()[0];
@@ -41,6 +45,7 @@ namespace DataInspector
 		{
 			return FindGenerticAncestor(type, DictionaryGenericType).GetGenericArguments()[1];
 		}
+
 
 		public static Type FindGenerticAncestor(Type type, Type wantedType)
 		{

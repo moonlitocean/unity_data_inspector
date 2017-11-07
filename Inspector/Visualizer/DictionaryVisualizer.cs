@@ -1,49 +1,55 @@
-﻿using System;
+using System;
 using System.Collections;
-using UnityEditor;
 
 namespace DataInspector
 {
-	internal class DictionaryVisualizer : VisualizerBase
+	internal class DictionaryVisualizer : BaseContainerVisualizer
 	{
-		public override bool HasChildren()
+		public override int Size(object collection)
 		{
-			return true;
+			return ((ICollection)collection).Count;
 		}
 
-		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
+		public override object[] Keys(object collection)
 		{
-			var dictionary = data as IDictionary;
-			if (dictionary == null)
-				return false;
-
-			EditorGUILayout.LabelField("Count: " + dictionary.Count);
-			return false;
-		}
-
-		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
-		{
-			var dictionary = data as IDictionary;
-			if (dictionary == null)
-				return false;
-
-			Type dictionaryValueType = null;
-			if (TypeTools.IsSubclassOfDictionary(type))
-				dictionaryValueType = TypeTools.GetDictionaryValueType(type);
-
-			return GUIContainerTools.EditElems(dictionary, EditElem(inspector, path, dictionary, dictionaryValueType),
-				inspector.isFoldout,
-				path + "[fold]");
-		}
-
-		private static Func<object, object, bool> EditElem(Inspector inspector, string path,
-			IDictionary dictionary, Type dictionaryValueType)
-		{
-			return (key, value) =>
+			object[] keys = new object[((IDictionary)collection).Count];
+			int index = 0;
+			foreach (var key in ((IDictionary)collection).Keys)
 			{
-				var valueType = value != null ? value.GetType() : dictionaryValueType;
-				return inspector.Inspect(key.ToString(), path + "." + key, value, valueType, null, v => dictionary[key] = v);
-			};
+				keys[index++] = key;
+			}
+			return keys;
+		}
+
+		public override object Get(object collection, object key)
+		{
+			return ((IDictionary)collection)[key];
+		}
+
+		public override bool Set(object collection, object key, object value)
+		{
+			bool changed = false;
+			if (!((IDictionary)collection).Contains(key))
+			{
+				changed = true;
+			}
+			else
+			{
+				if (((IDictionary)collection)[key] != value)
+					changed = true;
+			}
+
+			((IDictionary)collection)[key] = value;
+			return changed;
+		}
+
+		public override Type ValueType(object collection)
+		{
+			var type = collection.GetType();
+			if (TypeTools.IsSubclassOfDictionary(type))
+				return TypeTools.GetDictionaryValueType(type);
+			else
+				return typeof(object);
 		}
 	}
 }

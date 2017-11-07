@@ -1,12 +1,12 @@
 Temp
+obj
 Library
 LinkToInspector
 LinkToInspector_tolua_extension
 CustomVisualizor
 ProjectSettings
 *.meta
-*.CSharp.csproj*
-*.sln*
+*.csproj
+*.sln
 *.suo
-
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor;
 
 namespace DataInspector
 {
@@ -9,6 +10,16 @@ namespace DataInspector
 		public override bool HasChildren()
 		{
 			return true;
+		}
+
+		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
+		{
+			if (data == null)
+			{
+				EditorGUILayout.LabelField("null");
+				return false;
+			}
+			return base.InspectSelf(inspector, name, ref data, type);
 		}
 
 		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)

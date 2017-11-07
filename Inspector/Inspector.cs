@@ -21,6 +21,15 @@ namespace DataInspector
 			public int indentOffset = 15;	// Magic number, the offset of each EditorGUI.indentLevel. 
 											// (Used to correctly layout foldout rows, there should be some more Unity way but I dont know)
 
+			public int listBucketSize = 30;	// If container (list or dictionary) is too large, the elements would not be shown straight forward
+											// under the container but instead devided into buckets, with incremental key range. 
+											// listBucketSize defines the size of a bucket. 
+											//	
+											// e.g. for list of size 100 and bucket size 30, the buckets would be:
+											//	 0~29,  30~59,  60~89, 90~99
+											// 
+											// There can be multilevel bucket if the size is super large.
+
 			// TODO: Only supports CompositeVisualizer. Should apply to other visalizers.
 			public bool showNonPublicFields;
 			public bool showStaticFields;

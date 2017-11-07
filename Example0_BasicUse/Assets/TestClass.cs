@@ -104,4 +104,14 @@ public class TestClass
 	//----------------------------------------------------
 	// Final TestClass
 	public object _object = new int[3];
+	public List<int> _largelist = new List<int>(1000);
+	public Dictionary<string, int> _largedict = new Dictionary<string, int>();
+
+	public TestClass()
+	{
+		for (int i = 0; i < 1000; ++i)
+			_largelist.Add(i * 10);
+		for (int i = 0; i < 1000; ++i)
+			_largedict["This is a key of very large dictionary where the current key is " + i] = i * 10;
+	}
 }
