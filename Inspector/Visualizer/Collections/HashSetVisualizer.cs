@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace DataInspector
@@ -27,9 +28,7 @@ namespace DataInspector
 			if (c == null)
 				return false;
 
-			Type hashsetValueType = null;
-			if (TypeTools.IsSubclassOfHashSet(type))
-				hashsetValueType = TypeTools.GetHashSetValueType(type);
+			var hashsetValueType = TypeTools.FindGenericParamType(type, typeof(HashSet<>), 0);
 
 			int i = 0;
 			bool changed = false;

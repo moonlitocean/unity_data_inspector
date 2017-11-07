@@ -1,23 +1,38 @@
 ﻿using System;
 using DataInspector;
-using UnityEditor;
 
-public class ObjectDictionaryVisualizer : VisualizerBase
+public class ObjectDictionaryVisualizer : CollectionVisualizerBase
 {
-	public override bool HasChildren()
+	public override int Size(object collection)
 	{
-		return true;
+		return ((IObjectDictionary)collection).Count;
 	}
 
-	public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
+	public override object[] Keys(object collection)
 	{
-		var dictionary = data as IObjectDictionary;
-		if (dictionary == null)
-			return false;
-			
-		EditorGUILayout.LabelField("Count: " + dictionary.Count);
-		return false;
+		object[] keys = new object[((IObjectDictionary)collection).Count];
+		int index = 0;
+		foreach (var key in ((IObjectDictionary)collection).Keys)
+		{
+			keys[index++] = key;
+		}
+		return keys;
 	}
 
-	// TODO: Implement InspectChildren by refectoring GUIContainerTools to support dictionary-like data
+	public override object Get(object collection, object key)
+	{
+		return ((IObjectDictionary)collection).GetElem(key);
+	}
+
+	public override void Set(object collection, object key, object value)
+	{
+		((IObjectDictionary) collection).SetElem(key, value);
+	}
+
+	// 可选。
+	// 如果没有的话，容器不知道自己的元素类型，就不能直接构造新元素
+	public override Type ValueType(object collection)
+	{
+		return TypeTools.FindGenericParamType(collection.GetType(), typeof(ObjectDictionary<,>), 1);
+	}
 }

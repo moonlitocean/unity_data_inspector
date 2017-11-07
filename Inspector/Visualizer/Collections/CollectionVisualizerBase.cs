@@ -4,7 +4,7 @@ using UnityEditor;
 namespace DataInspector
 {
 	// 容器：可以用于Dictionary，List等按下表索引的类型
-	internal abstract class BaseContainerVisualizer : VisualizerBase, GUIContainerTools.IDictParser
+	public abstract class CollectionVisualizerBase : VisualizerBase, GUIContainerTools.IDictParser
 	{
 		public override bool HasChildren()
 		{
@@ -48,8 +48,10 @@ namespace DataInspector
 		public abstract int Size(object collection);
 		public abstract object[] Keys(object collection);
 		public abstract object Get(object collection, object key);
-		public abstract bool Set(object collection, object key, object value);
-		public abstract Type ValueType(object collection);
+		public abstract void Set(object collection, object key, object value);
+
+		// 可选功能：ValueType。若为null的话无法直接构造。
+		public virtual Type ValueType(object collection) {return null;}
 
 		// 可选功能：Resizable
 		public virtual bool Resizable(object collection) { return false; }					// 如果Resizable为false，则不需要实现Resize

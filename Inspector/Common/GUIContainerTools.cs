@@ -13,7 +13,7 @@ namespace DataInspector
 			int Size(object collection);
 			object[] Keys(object collection);
 			object Get(object dict, object key);
-			bool Set(object dict, object key, object value);		// 如果数据发生了改变，那么返回true
+			void Set(object dict, object key, object value);
 			Type ValueType(object dict);
 			bool Resizable(object collection);						// 如果Resizable为false，则不需要实现Resize
 			object Resize(object collection, int size);				// 返回新大小的容器（可以是自己）
@@ -50,7 +50,7 @@ namespace DataInspector
 			public int Size() { return parser.Size(dict); }
 			public object[] Keys() { return parser.Keys(dict); }
 			public object Get(object key) { return parser.Get(dict, key); }
-			public bool Set(object key, object value) { return parser.Set(dict, key, value); }
+			public void Set(object key, object value) { parser.Set(dict, key, value); }
 			public Type ValueType() {return parser.ValueType(dict);}
 			public bool Resizeable(){return parser.Resizable(dict);}
 			public object Resize(int size){return parser.Resize(dict, size);}
@@ -234,7 +234,11 @@ namespace DataInspector
 				extraTypeInfo = string.Format("   ({0})", valueType.Name);
 			}
 			string name = key != null ? CutName(key.ToString()) : "null";
-			return inspector.Inspect(name + extraTypeInfo, path + "." + name, value, valueType, null, v => state.Set(key, v));
+			return inspector.Inspect(name + extraTypeInfo, path + "." + name, value, valueType, null, v =>
+			{
+				if (value != v)
+					state.Set(key, v);
+			});
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////

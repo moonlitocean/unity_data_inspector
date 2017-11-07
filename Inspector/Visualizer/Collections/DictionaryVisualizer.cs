@@ -1,9 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace DataInspector
 {
-	internal class DictionaryVisualizer : BaseContainerVisualizer
+	internal class DictionaryVisualizer : CollectionVisualizerBase
 	{
 		public override int Size(object collection)
 		{
@@ -26,30 +27,14 @@ namespace DataInspector
 			return ((IDictionary)collection)[key];
 		}
 
-		public override bool Set(object collection, object key, object value)
+		public override void Set(object collection, object key, object value)
 		{
-			bool changed = false;
-			if (!((IDictionary)collection).Contains(key))
-			{
-				changed = true;
-			}
-			else
-			{
-				if (((IDictionary)collection)[key] != value)
-					changed = true;
-			}
-
 			((IDictionary)collection)[key] = value;
-			return changed;
 		}
 
 		public override Type ValueType(object collection)
 		{
-			var type = collection.GetType();
-			if (TypeTools.IsSubclassOfDictionary(type))
-				return TypeTools.GetDictionaryValueType(type);
-			else
-				return typeof(object);
+			return TypeTools.FindGenericParamType(collection.GetType(), typeof(Dictionary<,>), 1);
 		}
 	}
 }

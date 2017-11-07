@@ -71,36 +71,37 @@ namespace DataInspector
 			// If input is a type, then show static members of that type
 			//
 			// The draw back is, you cannot inpect the real content of Type type anymore.
-			rules.Add(typeof (Type), new StaticVisualizer());
+			rules.Add(typeof(Type), new StaticVisualizer());
 
 			/////////////////////////////////////////////////////////////////////////
 			// type --> visualize
 			// C# basic types
-			rules.Add(typeof (string), new StringVisualizer());
-			rules.Add(typeof (MulticastDelegate), new MulticastDelegateVisualizer());
-			rules.Add(typeof (DateTime), new DateTimeVisualizer());
-			rules.Add(typeof (TimeSpan), new TimeSpanVisualizer());
+			rules.Add(typeof(string), new StringVisualizer());
+			rules.Add(typeof(MulticastDelegate), new MulticastDelegateVisualizer());
+			rules.Add(typeof(DateTime), new DateTimeVisualizer());
+			rules.Add(typeof(TimeSpan), new TimeSpanVisualizer());
 
 			// C# containers
-			rules.Add(typeof (IList), new ListVisualizer());
-			rules.Add(typeof (IDictionary), new DictionaryVisualizer());
-			rules.Add(typeof (HashSet<>), new HashSetVisualizer());
+			rules.Add(typeof(Array), new ArrayVisualizer());
+			rules.Add(typeof(List<>), new ListVisualizer());
+			rules.Add(typeof(IDictionary), new DictionaryVisualizer());
+			rules.Add(typeof(HashSet<>), new HashSetVisualizer());
 
 			// UnityEngine types
-			rules.Add(typeof (UnityEngine.Object), new UnityObjectVisualizer());
+			rules.Add(typeof(UnityEngine.Object), new UnityObjectVisualizer());
 
 			var unityTypeVisualizer = new UnityTypeVisualizer();
-			rules.Add(typeof (Color), unityTypeVisualizer);
-			rules.Add(typeof (Vector2), unityTypeVisualizer);
-			rules.Add(typeof (Vector3), unityTypeVisualizer);
-			rules.Add(typeof (Vector4), unityTypeVisualizer);
-			rules.Add(typeof (Bounds), unityTypeVisualizer);
-			rules.Add(typeof (Rect), unityTypeVisualizer);
-			rules.Add(typeof (AnimationCurve), unityTypeVisualizer);
+			rules.Add(typeof(Color), unityTypeVisualizer);
+			rules.Add(typeof(Vector2), unityTypeVisualizer);
+			rules.Add(typeof(Vector3), unityTypeVisualizer);
+			rules.Add(typeof(Vector4), unityTypeVisualizer);
+			rules.Add(typeof(Bounds), unityTypeVisualizer);
+			rules.Add(typeof(Rect), unityTypeVisualizer);
+			rules.Add(typeof(AnimationCurve), unityTypeVisualizer);
 
 			// Markers
-			markRules.Add(typeof (UnixTimestampAttribute), new UnixTimeStampVisualizer());
-			
+			markRules.Add(typeof(UnixTimestampAttribute), new UnixTimeStampVisualizer());
+
 			// Extension
 			foreach (var extension in OnRegisterDefaultVisualizers)
 				extension.Value(this);

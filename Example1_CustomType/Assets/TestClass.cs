@@ -14,7 +14,7 @@ public class TestClass
 
 	public TestClass()
 	{
-		_objectDictionary.Add(10, new MyData());
-		_objectDictionary.Add(20, new MyData());
+		_objectDictionary.Add(10, new MyData{a = 11, b =12});
+		_objectDictionary.Add(20, new MyData{a = 21, b =22});
 	}
 }

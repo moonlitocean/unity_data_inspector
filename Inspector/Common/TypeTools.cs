@@ -1,51 +1,25 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
 
 namespace DataInspector
 {
 	internal static class TypeTools
 	{
-		private static readonly Type DictionaryGenericType = typeof(Dictionary<,>);
-		private static readonly Type ListGenericType = typeof(List<>);
-		private static readonly Type HashSetGenericType = typeof(HashSet<>);
-
-		////////////////////////////////////
-		// list
-		public static bool IsSubclassOfList(Type type)
+		//////////////////////////////////////////////////////////////////
+		// 主要用于找到容器的元素类型
+		public static Type FindGenericParamType(Type type, Type generic, int paramIndex)
 		{
-			return FindGenerticAncestor(type, ListGenericType) != null;
-		}
-		public static Type GetListValueType(Type type)
-		{
-			return FindGenerticAncestor(type, ListGenericType).GetGenericArguments()[0];
-		}
+			var ancestor = FindGenerticAncestor(type, generic);
+			if (ancestor == null)
+				return null;
 
-		////////////////////////////////////
-		// hashset
-		public static bool IsSubclassOfHashSet(Type type)
-		{
-			return FindGenerticAncestor(type, HashSetGenericType) != null;
-		}
+			var genericArguments = ancestor.GetGenericArguments();
+			if (paramIndex >= genericArguments.Length)
+				return null;
 
-		public static Type GetHashSetValueType(Type type)
-		{
-			return FindGenerticAncestor(type, HashSetGenericType).GetGenericArguments()[0];
+			return genericArguments[paramIndex];
 		}
-
-		////////////////////////////////////
-		// dictionary
-		public static bool IsSubclassOfDictionary(Type type)
-		{
-			return FindGenerticAncestor(type, DictionaryGenericType) != null;
-		}
-
-		public static Type GetDictionaryValueType(Type type)
-		{
-			return FindGenerticAncestor(type, DictionaryGenericType).GetGenericArguments()[1];
-		}
-
 
 		public static Type FindGenerticAncestor(Type type, Type wantedType)
 		{
