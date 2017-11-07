@@ -19,7 +19,7 @@ Inspector_tolua_extension | [tolua](https://github.com/topameng/tolua) 插件，
 文件夹 | 范例
 -|-
 Example0_BasicUse | 基本的功能展示
-Example1_CustomType | 对自定义类型，添加自定义的查看逻辑
+Example1_CustomType | 自定义普通数据类型、以及一个自定义的字典容器的数据查看。特别的，容器应当继承CollectionVisualizerBase，以便支持搜索，以及超大容器的成员折叠。
 Example2_tolua | tolua 支持，目前只支持 LuaTable
 
 # 特性
