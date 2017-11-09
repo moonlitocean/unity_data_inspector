@@ -80,7 +80,7 @@ namespace LuaInterface
         {
             get;
             private set;
-        }    
+        }
     }   
 
     public class LuaOut<T> { }

@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -15,11 +14,11 @@ namespace DataInspector
 		{
 			if (data == null)
 			{
-				EditorGUILayout.LabelField("null");
+				GUITools.LabelField("null");
 				return false;
 			}
 
-			EditorGUILayout.LabelField("Count: " + Size(data));
+			GUITools.LabelField("Count: " + Size(data));
 			return false;
 		}
 
@@ -30,7 +29,7 @@ namespace DataInspector
 
 			if (Resizable(data))
 			{
-				int size = Math.Max(0, EditorGUILayout.DelayedIntField("Size", Size(data)));
+				int size = Math.Max(0, GUITools.IntField("Size", Size(data)));
 				if (size != Size(data))
 				{
 					data = Resize(data, size);

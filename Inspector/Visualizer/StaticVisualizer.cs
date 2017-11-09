@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -46,7 +45,7 @@ namespace DataInspector
             var dataAsType = data as Type;
             if (dataAsType != null)
             {
-                EditorGUILayout.LabelField(string.Concat("Type: ", dataAsType.FullName));
+                GUITools.LabelField(string.Concat("Type: ", dataAsType.FullName));
                 return false;
             }
             return base.InspectSelf(inspector, name, ref data, type);

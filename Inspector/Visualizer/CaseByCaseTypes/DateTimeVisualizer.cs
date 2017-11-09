@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -24,7 +23,7 @@ namespace DataInspector
 			var time = (DateTime) data;
 
 			string oldstrdate = time.ToString(CultureInfo.CurrentCulture);
-			string strdate = EditorGUILayout.TextField(oldstrdate);
+			string strdate = GUITools.TextField(oldstrdate);
 			if (oldstrdate != strdate)
 				time = ParseDateTime(strdate, time.Kind, time);
 
@@ -34,10 +33,10 @@ namespace DataInspector
 		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
 		{
 			var time = (DateTime) data;
-			EditorGUILayout.LabelField("Unix Time Stamp", ToUnixTimestampString(time));
+			GUITools.LabelField("Unix Time Stamp", ToUnixTimestampString(time));
 
-			var ticks = EditorGUILayout.LongField("Ticks", time.Ticks);
-			var kind = (DateTimeKind) EditorGUILayout.EnumPopup("Kind", time.Kind);
+			var ticks = GUITools.LongField("Ticks", time.Ticks);
+			var kind = (DateTimeKind)GUITools.EnumPopup("Kind", time.Kind);
 			if (ticks != time.Ticks || kind != time.Kind)
 			{
 				try

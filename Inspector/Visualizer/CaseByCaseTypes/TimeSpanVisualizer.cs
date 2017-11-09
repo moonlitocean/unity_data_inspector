@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -15,7 +14,7 @@ namespace DataInspector
 			var span = (TimeSpan) data;
 
 			string oldstrdate = span.ToString();
-			string str = EditorGUILayout.TextField(name, oldstrdate);
+			string str = GUITools.TextField(name, oldstrdate);
 			if (oldstrdate != str)
 				span = ParseTimeSpan(str, span);
 

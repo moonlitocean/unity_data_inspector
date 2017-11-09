@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -39,7 +38,7 @@ namespace DataInspector
 			var action = data as MulticastDelegate;
 			if (action != null)
 			{
-				EditorGUILayout.LabelField("");
+				GUITools.LabelField("");
 			}
 			return false;
 		}

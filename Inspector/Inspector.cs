@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace DataInspector
@@ -33,13 +32,14 @@ namespace DataInspector
 			// TODO: Only supports CompositeVisualizer. Should apply to other visalizers.
 			public bool showNonPublicFields;
 			public bool showStaticFields;
+			public bool showProperties;
 			public bool sortFields;
 		}
 
 		public readonly Options options = new Options();
 		public readonly Dictionary<string, bool> isFoldout = new Dictionary<string, bool>(StringComparer.Ordinal);
 
-		private static readonly Dictionary<Type, VisualizerBase> cachedVisualizer = new Dictionary<Type, VisualizerBase>();
+		private readonly Dictionary<Type, VisualizerBase> cachedVisualizer = new Dictionary<Type, VisualizerBase>();
 
 		///////////////////////////////////////////////////////////////
 		// Visualizors in three categories: special, type rules, and IMark rules
@@ -49,6 +49,7 @@ namespace DataInspector
 		private readonly Dictionary<Type, VisualizerBase> rules = new Dictionary<Type, VisualizerBase>();
 		private readonly Dictionary<Type, VisualizerBase> markRules = new Dictionary<Type, VisualizerBase>();
 		private readonly Stack<bool> parentIsAlwaysShow = new Stack<bool>();
+		private bool inInspector;
 
 		///////////////////////////////////////////////////////////////
 		// Extra init step
@@ -102,6 +103,7 @@ namespace DataInspector
 			// Markers
 			markRules.Add(typeof(UnixTimestampAttribute), new UnixTimeStampVisualizer());
 
+			Debug.Log(cachedVisualizer.Count);
 			// Extension
 			foreach (var extension in OnRegisterDefaultVisualizers)
 				extension.Value(this);
@@ -195,10 +197,30 @@ namespace DataInspector
 			IMark mark = null,
 			Action<object> OnValueChanged = null)
 		{
+			if (inInspector)
+				return InspectInternal(name, path, data, type, mark, OnValueChanged);
+
+			try
+			{
+				inInspector = true;
+				GUITools.Setup();
+				return InspectInternal(name, path, data, type, mark, OnValueChanged);
+			}
+			finally
+			{
+				inInspector = false;
+			}
+		}
+
+		public bool InspectInternal(string name, string path, object data,
+			Type type = null,
+			IMark mark = null,
+			Action<object> OnValueChanged = null)
+		{
 			if (type == null)
 				type = data != null ? data.GetType() : null;
 
-			EditorGUIUtility.labelWidth = options.labelWidth;
+			GUITools.SetLabelWidth(options.labelWidth);
 			VisualizerBase visualizer = GetVisualizor(type, mark);
 			bool changed = false;
 			object changedData = data;
@@ -217,12 +239,12 @@ namespace DataInspector
 					bool alwaysShowChildren = !parentAlwaysShowChild && visualizer.AlwaysShowChildren();
 					if (!alwaysShowChildren)
 					{
-						using (new EditorGUILayout.HorizontalScope())
+						using (GUITools.HorizontalScope())
 						{
-							var width = options.labelWidth - options.indentOffset*EditorGUI.indentLevel;
-							using (new EditorGUILayout.HorizontalScope(GUILayout.Width(width)))
+							var width = options.labelWidth - options.indentOffset * GUITools.GetIndentLevel();
+							using (GUITools.HorizontalScope(width))
 							{
-								isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo, true);
+								isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo);
 							}
 							changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
 						}
@@ -237,12 +259,11 @@ namespace DataInspector
 						try
 						{
 							parentIsAlwaysShow.Push(alwaysShowChildren);
-							EditorGUI.indentLevel++;
-							changed |= visualizer.InspectChildren(this, path, ref changedData, type);
+							using(GUITools.Indent())
+								changed |= visualizer.InspectChildren(this, path, ref changedData, type);
 						}
 						finally
 						{
-							EditorGUI.indentLevel--;
 							parentIsAlwaysShow.Pop();
 						}
 					}
@@ -262,7 +283,7 @@ namespace DataInspector
 
 		private bool InspectRoot(string name, Type type, ref object data, VisualizerBase visualizer, IMark mark)
 		{
-			using (new EditorGUILayout.HorizontalScope())
+			using (GUITools.HorizontalScope())
 			{
 				bool changed = visualizer.InspectSelf(this, name, ref data, type);
 				if (type != null && type.IsClass)
@@ -398,7 +419,7 @@ namespace DataInspector
 			return null;
 		}
 
-		private static void AssertValidSetupState()
+		private void AssertValidSetupState()
 		{
 			if (cachedVisualizer.Count != 0)
 				throw new InvalidOperationException("Can not setup visualizer after Inspect()");

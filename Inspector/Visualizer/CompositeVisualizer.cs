@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -16,7 +15,7 @@ namespace DataInspector
 		{
 			if (data == null)
 			{
-				EditorGUILayout.LabelField("null");
+				GUITools.LabelField("null");
 				return false;
 			}
 			return base.InspectSelf(inspector, name, ref data, type);
@@ -44,6 +43,16 @@ namespace DataInspector
 			foreach (var fieldInfo in fields)
 			{
 				changed |= InspectField(inspector, path, ref data, fieldInfo, "");
+			}
+
+			if (inspector.options.showProperties)
+			{
+				foreach (
+					PropertyInfo propertyInfo in
+					type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+				{
+					changed |= InspectProperty(inspector, path, ref data, propertyInfo);
+				}
 			}
 			return changed;
 		}
@@ -83,6 +92,30 @@ namespace DataInspector
 				info.SetValue(data, changedvalue);
 			}
 			return changed;
+		}
+
+		private static bool InspectProperty(Inspector inspector, string path, ref object data,
+			PropertyInfo propertyInfo)
+		{
+			if (propertyInfo.CanRead)
+			{
+				object value;
+				try
+				{
+					value = propertyInfo.GetValue(data, null);
+				}
+				catch (Exception)
+				{
+					return false;
+				}
+
+				return inspector.Inspect(propertyInfo.Name, path + "." + propertyInfo.Name, value);
+			}
+			else
+			{
+				GUITools.LabelField(propertyInfo.Name, "unreadable");
+				return false;
+			}
 		}
 	}
 }

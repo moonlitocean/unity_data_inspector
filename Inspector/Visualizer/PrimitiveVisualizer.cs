@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -11,65 +10,66 @@ namespace DataInspector
 			object result;
 			if (data == null)
 			{
-				EditorGUILayout.LabelField(name, "null");
+				GUITools.LabelField(name, "null");
 				result = null;
 			}
 			else if (data is bool)
 			{
-				result = EditorGUILayout.Toggle(name, (bool) data);
+				result = (bool)GUITools.Toggle(name, (bool)data);
 			}
 			else if (data is byte)
 			{
-				result = (byte) EditorGUILayout.IntField(name, (byte) data);
+				result = (byte)GUITools.IntField(name, (byte)data);
 			}
 			else if (data is sbyte)
 			{
-				result = (sbyte) EditorGUILayout.IntField(name, (sbyte) data);
+				result = (sbyte)GUITools.IntField(name, (sbyte)data);
 			}
 			else if (data is short)
 			{
-				result = (short) EditorGUILayout.IntField(name, (short) data);
+				result = (short)GUITools.IntField(name, (short)data);
 			}
 			else if (data is ushort)
 			{
-				result = (ushort) EditorGUILayout.IntField(name, (ushort) data);
+				result = (ushort)GUITools.IntField(name, (ushort)data);
 			}
 			else if (data is int)
 			{
-				result = EditorGUILayout.IntField(name, (int) data);
+				result = (int)GUITools.IntField(name, (int)data);
 			}
 			else if (data is uint)
 			{
-				EditorGUILayout.LongField(name, (uint) data);
-				result = data;
+				result = (uint)GUITools.LongField(name, (uint)data);
 			}
 			else if (data is long)
 			{
-				result = ParseLong(EditorGUILayout.TextField(name, data.ToString()), (long) data);
+				result = (long)ParseLong(GUITools.TextField(name, data.ToString()), (long)data);
 			}
 			else if (data is ulong)
 			{
-				result = ParseULong(EditorGUILayout.TextField(name, data.ToString()), (ulong) data);
+				result = (ulong)ParseULong(GUITools.TextField(name, data.ToString()), (ulong)data);
 			}
 			else if (data is IntPtr)
 			{
-				result = (IntPtr) ParseLong(EditorGUILayout.TextField(name, data.ToString()), (long) data);
+				GUITools.TextField(name, data.ToString());
+				result = data;
 			}
 			else if (data is UIntPtr)
 			{
-				result = (UIntPtr) ParseULong(EditorGUILayout.TextField(name, data.ToString()), (ulong) data);
+				GUITools.TextField(name, data.ToString());
+				result = data;
 			}
 			else if (data is char)
 			{
-				result = ParseChar(EditorGUILayout.TextField(name, data.ToString()), (char) data);
+				result = (char)ParseChar(GUITools.TextField(name, data.ToString()), (char) data);
 			}
 			else if (data is float)
 			{
-				result = EditorGUILayout.FloatField(name, (float) data);
+				result = (float)GUITools.FloatField(name, (float)data);
 			}
 			else if (data is double)
 			{
-				result = EditorGUILayout.DoubleField(name, (double) data);
+				result = (double)GUITools.DoubleField(name, (double)data);
 			}
 			else
 			{

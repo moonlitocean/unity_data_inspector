@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace DataInspector
@@ -75,7 +74,9 @@ namespace DataInspector
 
 		private static void RebuildDisplayIfNeed(DictionaryGUIState state, int bucketSize)
 		{
-			if (state.display == null || state.searchInput.changed || IsKeyChanged(state) || state.display.bucketSize != bucketSize)
+			if (state.display == null || 
+				Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state) || state.display.bucketSize != bucketSize)
+			)
 			{
 				var display = new DictionaryDisplay();
 				display.keys = state.Keys();
@@ -102,36 +103,38 @@ namespace DataInspector
 			var now = DateTime.Now;
 			SearchInputState input = state.searchInput;
 			using (GUITools.Indent())
-			using (new GUILayout.HorizontalScope("box"))
 			{
-				var newInput = EditorGUILayout.TextField("Search: ", input.text);
-				if (newInput != input.text)
+				using (GUITools.HorizontalScope())
 				{
-					input.text = newInput;
-					input.lastTextChange = now;
-					if (input.inputStart.Ticks == 0)
-						input.inputStart = now;
-				}
-				else
-				{
-					if (Math.Abs((now - input.lastTextChange).TotalSeconds) > 0.5)
-						input.inputStart = new DateTime();
-				}
+					var newInput = GUITools.TextField("Search: ", input.text ?? "");
+					if (newInput != input.text)
+					{
+						input.text = newInput;
+						input.lastTextChange = now;
+						if (input.inputStart.Ticks == 0)
+							input.inputStart = now;
+					}
+					else
+					{
+						if (Math.Abs((now - input.lastTextChange).TotalSeconds) > 0.5)
+							input.inputStart = new DateTime();
+					}
 
-				if (input.text != input.filter &&
-					(
-						input.inputStart.Ticks == 0 ||
-						Math.Abs((now - input.lastFilterChange).TotalSeconds) > 1 &&
-						Math.Abs((now - input.inputStart).TotalSeconds) > 1
-					))
-				{
-					input.changed = true;
-					input.filter = input.text;
-					input.lastFilterChange = DateTime.Now;
-				}
-				else
-				{
-					input.changed = false;
+					if (input.text != input.filter &&
+						(
+							input.inputStart.Ticks == 0 ||
+							Math.Abs((now - input.lastFilterChange).TotalSeconds) > 1 &&
+							Math.Abs((now - input.inputStart).TotalSeconds) > 1
+						))
+					{
+						input.changed = true;
+						input.filter = input.text;
+						input.lastFilterChange = DateTime.Now;
+					}
+					else
+					{
+						input.changed = false;
+					}
 				}
 			}
 		}
@@ -210,7 +213,7 @@ namespace DataInspector
 					var label = FormatKeyRange(innerKeyBegin, innerKeyEnd);
 					var foldoutPath = path + "[" + innerKeyBegin + "~" + innerKeyEnd + "]";
 
-					inspector.isFoldout[foldoutPath] = GUITools.Foldout(inspector.isFoldout.ContainsKey(foldoutPath) && inspector.isFoldout[foldoutPath], label, true);
+					inspector.isFoldout[foldoutPath] = GUITools.Foldout(inspector.isFoldout.ContainsKey(foldoutPath) && inspector.isFoldout[foldoutPath], label);
 					if (inspector.isFoldout[foldoutPath])
 					{
 						using (GUITools.Indent())

@@ -1,14 +1,34 @@
 ﻿using System;
 using DataInspector;
+using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 internal class MyColorVisualizer : VisualizerBase
 {
 	// 1. I want the standard Unity color picker as the main inspector
+	//    Note the code must run in both Editor & None editor envionment
+
 	public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 	{
-		MyColor income = EditorGUILayout.ColorField(name, (MyColor)data);
-		return ApplyValueIfNotEqual(ref data, income);
+		// Check if in editor
+		if (GUITools.IsInEditor())
+		{
+#if UNITY_EDITOR
+			MyColor income = EditorGUILayout.ColorField(name, (MyColor) data);
+			return ApplyValueIfNotEqual(ref data, income);
+#else
+			throw new NotImplementedException();
+#endif
+		}
+		else
+		{
+			Color c = (MyColor) data;
+			GUITools.LabelField(name, c.ToString());
+			return false;
+		}
 	}
 
 	// 2. I also want to display the detailed values of color (r,g,b,a), so I set HasChildren() as true

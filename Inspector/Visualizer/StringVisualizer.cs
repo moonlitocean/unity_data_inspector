@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -19,11 +18,11 @@ namespace DataInspector
 		{
 			if (data == null)
 			{
-				EditorGUILayout.LabelField(name, "null");
+				GUITools.LabelField(name, "null");
 				return false;
 			}
 
-			return ApplyValueIfNotEqual(ref data, EditorGUILayout.TextField(name, (string) data));
+			return ApplyValueIfNotEqual(ref data, GUITools.TextField(name, (string)data));
 		}
 	}
 }

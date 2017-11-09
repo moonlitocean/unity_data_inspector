@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -16,9 +15,9 @@ namespace DataInspector
 			if (e == null)
 				return false;
 			if (TypeTools.GetAttribute<FlagsAttribute>(type) != null)
-				return ApplyValueIfNotEqual(ref data, EditorGUILayout.EnumMaskField(name, e));
+				return ApplyValueIfNotEqual(ref data, GUITools.EnumMaskField(name, e));
 			else
-				return ApplyValueIfNotEqual(ref data, EditorGUILayout.EnumPopup(name, e));
+				return ApplyValueIfNotEqual(ref data, GUITools.EnumPopup(name, e));
 		}
 	}
 }

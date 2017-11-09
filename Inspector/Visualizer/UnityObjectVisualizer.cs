@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,9 +16,9 @@ namespace DataInspector
 		{
 			var obj = data as Object;
 			if (obj != null)
-				obj = EditorGUILayout.ObjectField(obj, type, true, null);
+				obj = GUITools.ObjectField(obj, type);
 			else
-				obj = EditorGUILayout.ObjectField(null, type, true, null);
+				obj = GUITools.ObjectField(null, type);
 
 			return ApplyValueIfNotEqual(ref data, obj);
 		}
@@ -93,7 +92,7 @@ namespace DataInspector
 			}
 			else
 			{
-				EditorGUILayout.LabelField(propertyInfo.Name, "unreadable");
+				GUITools.LabelField(propertyInfo.Name, "unreadable");
 				return false;
 			}
 		}

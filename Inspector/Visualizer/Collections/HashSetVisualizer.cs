@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 
 namespace DataInspector
 {
@@ -18,7 +17,7 @@ namespace DataInspector
 			if (container == null)
 				return false;
 
-			EditorGUILayout.LabelField("Count: " + GetCount(data));
+			GUITools.LabelField("Count: " + GetCount(data));
 			return false;
 		}
 

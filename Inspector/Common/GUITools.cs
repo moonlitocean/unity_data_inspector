@@ -1,20 +1,56 @@
 ﻿using System;
-using UnityEditor;
+using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DataInspector
 {
-	public static class GUITools
+	public static partial class GUITools
 	{
-		public static bool Foldout(bool foldout, string content, bool toggleOnLabelClick)
+#if UNITY_EDITOR
+		private static readonly IGUITools editorTools = new EditorGUITools();
+#endif
+		private static readonly IGUITools gameTools = new GameGUITools();
+		private static int indentLevel;
+		private static int indentOffset = 15;
+		private static int toggleExtraIndent = 7;
+		private static int labelWidth;
+		private static IGUITools tools = gameTools;
+		private static FieldInfo cached_s_SkinMode;
+
+		internal interface IGUITools
 		{
-			var rect = GUILayoutUtility.GetRect(EditorGUIUtility.fieldWidth, EditorGUIUtility.fieldWidth, 16f, 16f);
-			return EditorGUI.Foldout(rect, foldout, content, toggleOnLabelClick);
+			bool Foldout(bool foldout, string content);
+			void LabelField(string label);
+			void LabelField(string label, string label2);
+			int IntField(string label, int value);
+			long LongField(string label, long value);
+			Enum EnumMaskField(string label, Enum enumValue);
+			Enum EnumPopup(string label, Enum enumValue);
+			string TextField(string text);
+			string TextField(string label, string text);
+			Object ObjectField(Object obj, Type objType);
+			bool Toggle(string label, bool value);
+			float FloatField(string label, float value);
+			double DoubleField(string label, double value);
+			void SetLabelWidth(int labelWidth);
+			int GetIndentLevel();
+			IDisposable Indent();
 		}
 
-		public static IDisposable Indent()
+		public static void Setup()
 		{
-			return new GUIEditorIndent();
+#if UNITY_EDITOR
+			if (IsInEditor())	tools = editorTools;
+			else				tools = gameTools;
+#endif
+		}
+
+		public static bool IsInEditor()
+		{
+			if(cached_s_SkinMode == null)
+				cached_s_SkinMode = typeof(GUIUtility).GetField("s_SkinMode", BindingFlags.NonPublic | BindingFlags.Static);
+			return cached_s_SkinMode != null && (int)cached_s_SkinMode.GetValue(null) != 0;
 		}
 
 		public static IDisposable Scroll(ref Vector2 scroll)
@@ -22,29 +58,50 @@ namespace DataInspector
 			return new GUIScroll(ref scroll);
 		}
 
-		private class GUIEditorIndent : IDisposable
+		public static IDisposable HorizontalScope()
 		{
-			public GUIEditorIndent()
-			{
-				++EditorGUI.indentLevel;
-			}
-
-			public void Dispose()
-			{
-				--EditorGUI.indentLevel;
-			}
+			return new GUILayout.HorizontalScope();
 		}
 
+		public static IDisposable HorizontalScope(int width)
+		{
+			return new GUILayout.HorizontalScope(GUILayout.Width(width));
+		}
+
+		public static IDisposable HorizontalScope(GUIStyle style)
+		{
+			return new GUILayout.HorizontalScope(style);
+		}
+
+		public static bool Foldout(bool foldout, string content)		{ return tools.Foldout(foldout, content);}
+		public static void LabelField(string label)						{ tools.LabelField(label);}
+		public static void LabelField(string label, string label2)		{ tools.LabelField(label, label2);}
+		public static int IntField(string label, int value)				{ return tools.IntField(label, value);}
+		public static long LongField(string label, long value)			{ return tools.LongField(label,value);}
+		public static Enum EnumMaskField(string label, Enum enumValue)	{ return tools.EnumMaskField(label, enumValue);}
+		public static Enum EnumPopup(string label, Enum enumValue)		{ return tools.EnumPopup(label, enumValue);}
+		public static string TextField(string text)						{ return tools.TextField(text);}
+		public static string TextField(string label, string text)		{ return tools.TextField(label, text);}
+		public static Object ObjectField(Object obj, Type objType)		{ return tools.ObjectField(obj, objType);}
+		public static bool Toggle(string label, bool value)				{ return tools.Toggle(label, value);}
+		public static float FloatField(string label, float value)		{ return tools.FloatField(label, value);}
+		public static double DoubleField(string label, double value)	{ return tools.DoubleField(label, value);}
+		public static void SetLabelWidth(int labelWidth)				{ tools.SetLabelWidth(labelWidth);}
+		public static int GetIndentLevel()								{ return tools.GetIndentLevel();}
+		public static IDisposable Indent()								{ return tools.Indent();}
+
+		//////////////////////////////////////////////////////////////////////////////////////
+		// 
 		private class GUIScroll : IDisposable
 		{
 			public GUIScroll(ref Vector2 scroll)
 			{
-				scroll = EditorGUILayout.BeginScrollView(scroll);
+				scroll = GUILayout.BeginScrollView(scroll);
 			}
 
 			public void Dispose()
 			{
-				EditorGUILayout.EndScrollView();
+				GUILayout.EndScrollView();
 			}
 		}
 	}
