@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace DataInspector
 {
@@ -14,11 +15,11 @@ namespace DataInspector
 		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
 			if (data == null)
-			{
-				GUITools.LabelField("null");
-				return false;
-			}
-			return base.InspectSelf(inspector, name, ref data, type);
+				GUITools.LabelField("null [" + type.Name + "]");
+			else
+				GUITools.LabelField(type.Name);
+			GUILayout.FlexibleSpace();
+			return false;
 		}
 
 		public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)

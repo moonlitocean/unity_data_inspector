@@ -5,80 +5,50 @@ using System.Reflection;
 
 namespace DataInspector
 {
-	internal class StaticVisualizer : VisualizerBase
+	internal class StaticVisualizer : CollectionVisualizerBase
 	{
 		private class FieldData
 		{
-			public FieldInfo field;
-			public IMark mark;
+			public string[] fieldNames;
+			public Dictionary<string, FieldInfo> fields;
 		}
+		private static readonly Dictionary<Type, FieldData> cachedFields = new Dictionary<Type, FieldData>();
 
-		private static readonly Dictionary<Type, FieldData[]> cachedFields = new Dictionary<Type, FieldData[]>();
-
-		private static FieldData[] GetFieldInfos(Type type)
+		private static FieldData GetFieldInfos(Type type)
 		{
 			if (!cachedFields.ContainsKey(type))
 			{
-				var fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public).OrderBy(o => o.Name).ToArray();
-				var data = new FieldData[fieldInfos.Length];
+				var data = new FieldData();
+				var fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public).ToArray();
 
-				for (int i = 0; i < fieldInfos.Length; i++)
-				{
-					data[i] = new FieldData
-					{
-						field = fieldInfos[i],
-						mark = TypeTools.GetAttribute<IMark>(fieldInfos[i])
-					};
-				}
+				data.fields = new Dictionary<string, FieldInfo>(fieldInfos.Length);
+				data.fieldNames = fieldInfos.Select(o => o.Name).ToArray();
+				foreach (var field in fieldInfos)
+					data.fields[field.Name] = field;
+
 				cachedFields.Add(type, data);
 			}
 			return cachedFields[type];
 		}
 
-		public override bool HasChildren()
+		public override int Size(object collection)
 		{
-			return true;
+			return GetFieldInfos((Type)collection).fieldNames.Length;
 		}
 
-        public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
-        {
-            var dataAsType = data as Type;
-            if (dataAsType != null)
-            {
-                GUITools.LabelField(string.Concat("Type: ", dataAsType.FullName));
-                return false;
-            }
-            return base.InspectSelf(inspector, name, ref data, type);
-        }
-
-        public override bool InspectChildren(Inspector inspector, string path, ref object data, Type type)
+		public override object[] Keys(object collection)
 		{
-			var dataAsType = data as Type;
-			if (dataAsType == null)
-				return false;
-
-			bool changed = false;
-			foreach (FieldData field in GetFieldInfos(dataAsType))
-			{
-				changed |= InspectField(inspector, path + "." + field.field.Name, ref data, field);
-			}
-			return changed;
+			return GetFieldInfos((Type)collection).fieldNames;
 		}
 
-		private static bool InspectField(Inspector inspector, string path, ref object data, FieldData fieldInfo)
+		public override object Get(object collection, object key)
 		{
-			bool changed = false;
-			object newValue = null;
-			inspector.Inspect(fieldInfo.field.Name, path, fieldInfo.field.GetValue(null), fieldInfo.field.FieldType,
-				fieldInfo.mark, v =>
-				{
-					changed = true;
-					newValue = v;
-				});
+			return GetFieldInfos((Type)collection).fields[(string)key].GetValue(null);
+		}
 
-			if (changed)
-				fieldInfo.field.SetValue(data, newValue);
-			return changed;
+		public override void Set(object collection, object key, object value)
+		{
+			GetFieldInfos((Type)collection).fields[(string)key].SetValue(null, value);
 		}
 	}
 }

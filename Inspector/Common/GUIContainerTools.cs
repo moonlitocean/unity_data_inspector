@@ -66,7 +66,7 @@ namespace DataInspector
 			UpdateCheck();
 
 			DictionaryGUIState state = GetOrCreateCachedState(dict, parser);
-			DrawSearchInput(state);
+			DrawSearchInput(state, inspector.options);
 			RebuildDisplayIfNeed(state, inspector.options.listBucketSize);
 
 			return Traversal(inspector, path, state, 0, state.display.resultKeys.Length);
@@ -95,10 +95,16 @@ namespace DataInspector
 			return state.display != null && !ArrayEqual(state.display.keys, state.Keys());
 		}
 
-		private static void DrawSearchInput(DictionaryGUIState state)
+		private static void DrawSearchInput(DictionaryGUIState state, Inspector.Options options)
 		{
 			if (state.searchInput == null)
 				state.searchInput = new SearchInputState();
+
+			if (state.Size() < options.showSearchAtSize)
+			{
+				ClearSearchInput(state);
+				return;
+			}
 
 			var now = DateTime.Now;
 			SearchInputState input = state.searchInput;
@@ -136,6 +142,15 @@ namespace DataInspector
 						input.changed = false;
 					}
 				}
+			}
+		}
+
+		private static void ClearSearchInput(DictionaryGUIState state)
+		{
+			if (state.searchInput != null && !string.IsNullOrEmpty(state.searchInput.text))
+			{
+				state.searchInput.text = "";
+				state.searchInput.changed = true;
 			}
 		}
 
@@ -231,13 +246,8 @@ namespace DataInspector
 		{
 			object value = state.Get(key);
 			Type valueType = value != null ? value.GetType() : dictValueType;
-			string extraTypeInfo = string.Empty;
-			if (valueType != dictValueType)
-			{
-				extraTypeInfo = string.Format("   ({0})", valueType.Name);
-			}
 			string name = key != null ? CutName(key.ToString()) : "null";
-			return inspector.Inspect(name + extraTypeInfo, path + "." + name, value, valueType, null, v =>
+			return inspector.Inspect(name, path + "." + name, value, valueType, null, v =>
 			{
 				if (value != v)
 					state.Set(key, v);

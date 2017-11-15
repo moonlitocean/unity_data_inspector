@@ -28,6 +28,7 @@ namespace DataInspector
 											//	 0~29,  30~59,  60~89, 90~99
 											// 
 											// There can be multilevel bucket if the size is super large.
+			public int showSearchAtSize = 10;	// If container is big enough, show search box
 
 			// TODO: Only supports CompositeVisualizer. Should apply to other visalizers.
 			public bool showNonPublicFields;
@@ -221,7 +222,7 @@ namespace DataInspector
 				type = data != null ? data.GetType() : null;
 
 			GUITools.SetLabelWidth(options.labelWidth);
-			VisualizerBase visualizer = GetVisualizor(type, mark);
+			VisualizerBase visualizer = GetVisualizer(type, mark);
 			bool changed = false;
 			object changedData = data;
 			if (visualizer != null)
@@ -336,7 +337,7 @@ namespace DataInspector
 		//  * Registered interface
 		//		If multiply interfaces match, the result is unspecified, depend on the sequence of GetInterfaces()
 		//  * Finally, if no visualizer is matched, return composite visualizer
-		private VisualizerBase GetVisualizor(Type type, IMark mark)
+		private VisualizerBase GetVisualizer(Type type, IMark mark)
 		{
 			if (mark != null)
 				return FindMarkVisualizer(mark);
