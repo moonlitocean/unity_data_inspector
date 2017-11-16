@@ -104,7 +104,6 @@ namespace DataInspector
 			// Markers
 			markRules.Add(typeof(UnixTimestampAttribute), new UnixTimeStampVisualizer());
 
-			Debug.Log(cachedVisualizer.Count);
 			// Extension
 			foreach (var extension in OnRegisterDefaultVisualizers)
 				extension.Value(this);
