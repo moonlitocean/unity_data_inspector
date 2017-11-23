@@ -31,9 +31,9 @@ namespace DataInspector
 			return cachedFields[type];
 		}
 
-		public override int Size(object collection)
+		public override bool ShowSize()
 		{
-			return GetFieldInfos((Type)collection).fieldNames.Length;
+			return false;
 		}
 
 		public override object[] Keys(object collection)
