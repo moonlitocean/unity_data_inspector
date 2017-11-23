@@ -40,22 +40,22 @@ namespace DataInspector
 
 		private class DictionaryGUIState
 		{
-			public object dict;			// 实际的字典（抽象的key-value对）
+			public WeakReference dict;	// 实际的字典（抽象的key-value对）
 			public IDictParser parser;	// 字典对应的解析器
 
 			public SearchInputState searchInput;
 			public DictionaryDisplay display;
 
-			public int Size() { return parser.Size(dict); }
-			public object[] Keys() { return parser.Keys(dict); }
-			public object Get(object key) { return parser.Get(dict, key); }
-			public void Set(object key, object value) { parser.Set(dict, key, value); }
-			public Type ValueType() {return parser.ValueType(dict);}
-			public bool Resizeable(){return parser.Resizable(dict);}
-			public object Resize(int size){return parser.Resize(dict, size);}
+			public int Size() { return parser.Size(dict.Target); }
+			public object[] Keys() { return parser.Keys(dict.Target); }
+			public object Get(object key) { return parser.Get(dict.Target, key); }
+			public void Set(object key, object value) { parser.Set(dict.Target, key, value); }
+			public Type ValueType() {return parser.ValueType(dict.Target);}
+			public bool Resizeable(){return parser.Resizable(dict.Target);}
+			public object Resize(int size){return parser.Resize(dict.Target, size);}
 		}
 
-		private static readonly Dictionary<WeakReference, DictionaryGUIState> guiCache = new Dictionary<WeakReference, DictionaryGUIState>();
+		private static readonly Dictionary<string, DictionaryGUIState> guiCache = new Dictionary<string, DictionaryGUIState>();
 		private static DateTime lastCacheRecycleCheck;
 
 		// 如果数据发生了修改，则返回true。
@@ -65,7 +65,7 @@ namespace DataInspector
 		{
 			UpdateCheck();
 
-			DictionaryGUIState state = GetOrCreateCachedState(dict, parser);
+			DictionaryGUIState state = GetOrCreateCachedState(path, dict, parser);
 			DrawSearchInput(state, inspector.options);
 			RebuildDisplayIfNeed(state, inspector.options.listBucketSize);
 
@@ -83,9 +83,10 @@ namespace DataInspector
 				display.bucketSize = bucketSize;
 
 				if (!string.IsNullOrEmpty(state.searchInput.text))
-					display.resultKeys = Sorted(FilterKeys(display.keys, state.searchInput));
+					display.resultKeys = FilterKeys(display.keys, state.searchInput);
 				else
-					display.resultKeys = Sorted(display.keys);
+					display.resultKeys = display.keys;
+				Sort(display.resultKeys);
 				state.display = display;
 			}
 		}
@@ -174,29 +175,31 @@ namespace DataInspector
 			RemoveDeadCache();
 		}
 
+		private static readonly List<string> tempList = new List<string>();
+
 		private static void RemoveDeadCache()
 		{
-			foreach (var weakRef in guiCache.Keys)
+			tempList.Clear();
+			foreach (var data in guiCache)
 			{
-				if (!weakRef.IsAlive)
-					guiCache.Remove(weakRef);
+				if (!data.Value.dict.IsAlive)
+					tempList.Add(data.Key);
 			}
+			for (var i = 0; i < tempList.Count; i++)
+				guiCache.Remove(tempList[i]);
+			tempList.Clear();
 		}
 
-		private static DictionaryGUIState GetOrCreateCachedState(object dict, IDictParser parser)
+		private static DictionaryGUIState GetOrCreateCachedState(string path, object dict, IDictParser parser)
 		{
-			var weakKey = guiCache.FirstOrDefault(o => o.Key.Target == dict).Key;
-			if (weakKey == null)
-			{
-				weakKey = new WeakReference(dict);
-				guiCache[weakKey] = new DictionaryGUIState
-				{
-					dict = dict,
-					parser = parser,
-				};
-			}
+			if (!guiCache.ContainsKey(path))
+				guiCache[path] = new DictionaryGUIState();
 
-			return guiCache[weakKey];
+			var cached = guiCache[path];
+			if (cached.dict == null || cached.dict.Target != dict)
+				cached.dict = new WeakReference(dict);
+			cached.parser = parser;
+			return cached;
 		}
 
 		private static bool Traversal(Inspector inspector, string path, DictionaryGUIState state, int start, int end)
@@ -246,8 +249,8 @@ namespace DataInspector
 		{
 			object value = state.Get(key);
 			Type valueType = value != null ? value.GetType() : dictValueType;
-			string name = key != null ? CutName(key.ToString()) : "null";
-			return inspector.Inspect(name, path + "." + name, value, valueType, null, v =>
+			string fullName = key != null ? key.ToString() : "null";
+			return inspector.Inspect(CutName(fullName), path + "." + fullName, value, valueType, null, v =>
 			{
 				if (value != v)
 					state.Set(key, v);
@@ -270,41 +273,30 @@ namespace DataInspector
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// ui key rules
-		private static object[] Sorted(object[] keys)
+		private static void Sort(object[] keys)
 		{
-			bool isInt = false;
-			bool isString = false;
-			foreach (var key in keys)
+			if (keys.Length == 0)
+				return;
+
+			try
 			{
-				if (key is int)
+				if (keys[0].GetType().IsPrimitive)
 				{
-					isInt = true;
-					break;
+					Array.Sort(keys);
+					return;
 				}
-				else if (key is string)
+				else if (keys[0] is string)
 				{
-					isString = true;
-					break;
+					Array.Sort(keys, StringComparer.Ordinal);
+					return;
 				}
+			}
+			catch (Exception)
+			{
 			}
 
-			var result = keys.Clone() as object[];
-			if (isInt)
-			{
-				var ar = keys.Cast<int>().ToArray();
-				Array.Sort(ar, result);
-			}
-			else if (isString)
-			{
-				var ar = keys.Cast<string>().ToArray();
-				Array.Sort(ar, result, StringComparer.Ordinal);
-			}
-			else
-			{
-				var ar = keys.Select(o => o.ToString()).ToArray();
-				Array.Sort(ar, result, StringComparer.Ordinal);
-			}
-			return result;
+			var ar = keys.Select(o => o.ToString()).ToArray();
+			Array.Sort(ar, keys, StringComparer.Ordinal);
 		}
 
 		private static string FormatKeyRange(object begin, object end)

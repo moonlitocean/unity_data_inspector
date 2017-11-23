@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace DataInspector
 {
@@ -15,10 +16,14 @@ namespace DataInspector
 			if (data == null)
 			{
 				GUITools.LabelField("null");
+				GUILayout.FlexibleSpace();
 				return false;
 			}
 
-			GUITools.LabelField("Count: " + Size(data));
+			if (ShowSize())
+				GUITools.LabelField("Count: " + Size(data));
+
+			GUILayout.FlexibleSpace();
 			return false;
 		}
 
@@ -29,8 +34,9 @@ namespace DataInspector
 
 			if (Resizable(data))
 			{
-				int size = Math.Max(0, GUITools.IntField("Size", Size(data)));
-				if (size != Size(data))
+			    var oldSize = Size(data);
+			    int size = Math.Max(0, GUITools.IntField("Size", oldSize));
+				if (size != oldSize)
 				{
 					data = Resize(data, size);
 					return true;
@@ -44,7 +50,6 @@ namespace DataInspector
 		// 通过实现下面的成员方法，来定义容器的行为
 
 		// 必须功能：访问和遍历
-		public abstract int Size(object collection);
 		public abstract object[] Keys(object collection);
 		public abstract object Get(object collection, object key);
 		public abstract void Set(object collection, object key, object value);
@@ -52,9 +57,13 @@ namespace DataInspector
 		// 可选功能：ValueType。若为null的话无法直接构造。
 		public virtual Type ValueType(object collection) {return null;}
 
+		// 可选功能：Size
+		public virtual bool ShowSize() {return true;}
+		public virtual int Size(object collection) { return 0; }
+
 		// 可选功能：Resizable
 		public virtual bool Resizable(object collection) { return false; }					// 如果Resizable为false，则不需要实现Resize
 		public virtual object Resize(object collection, int size){return collection;}		// 返回新大小的容器（可以是自己）
-	}
+    }
 }
 
