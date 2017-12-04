@@ -53,6 +53,17 @@ namespace DataInspector
 			return resized;
 		}
 
+		public static void TrySort(object[] keys)
+		{
+			try
+			{
+				Array.Sort(keys);
+			}
+			catch (Exception)
+			{
+			}
+		}
+
 		public static object CreateInstance(Type type)
 		{
 			if (type == typeof(string))

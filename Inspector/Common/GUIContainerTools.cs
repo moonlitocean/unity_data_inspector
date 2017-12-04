@@ -41,7 +41,8 @@ namespace DataInspector
 		private class DictionaryGUIState
 		{
 			public WeakReference dict;	// 实际的字典（抽象的key-value对）
-			public IDictParser parser;	// 字典对应的解析器
+			public IDictParser parser;  // 字典对应的解析器
+			public DateTime lastVisit;	// 上次访问
 
 			public SearchInputState searchInput;
 			public DictionaryDisplay display;
@@ -182,7 +183,7 @@ namespace DataInspector
 			tempList.Clear();
 			foreach (var data in guiCache)
 			{
-				if (!data.Value.dict.IsAlive)
+				if (!data.Value.dict.IsAlive && DateTime.Now -data.Value.lastVisit > TimeSpan.FromSeconds(1))
 					tempList.Add(data.Key);
 			}
 			for (var i = 0; i < tempList.Count; i++)
@@ -199,6 +200,7 @@ namespace DataInspector
 			if (cached.dict == null || cached.dict.Target != dict)
 				cached.dict = new WeakReference(dict);
 			cached.parser = parser;
+			cached.lastVisit = DateTime.Now;
 			return cached;
 		}
 

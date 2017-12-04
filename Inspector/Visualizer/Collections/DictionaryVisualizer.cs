@@ -19,7 +19,7 @@ namespace DataInspector
 			{
 				keys[index++] = key;
 			}
-			Array.Sort(keys);
+			TypeTools.TrySort(keys);
 			return keys;
 		}
 
