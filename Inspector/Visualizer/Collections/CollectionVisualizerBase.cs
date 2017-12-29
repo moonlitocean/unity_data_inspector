@@ -50,7 +50,7 @@ namespace DataInspector
 		// 通过实现下面的成员方法，来定义容器的行为
 
 		// 必须功能：访问和遍历
-		public abstract object[] Keys(object collection);
+		public abstract object[] Keys(Inspector.Options options, object collection);
 		public abstract object Get(object collection, object key);
 		public abstract void Set(object collection, object key, object value);
 

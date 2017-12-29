@@ -10,7 +10,7 @@ namespace DataInspector
 		public interface IDictParser
 		{
 			int Size(object collection);
-			object[] Keys(object collection);
+			object[] Keys(Inspector.Options options, object collection);
 			object Get(object dict, object key);
 			void Set(object dict, object key, object value);
 			Type ValueType(object dict);
@@ -48,7 +48,7 @@ namespace DataInspector
 			public DictionaryDisplay display;
 
 			public int Size() { return parser.Size(dict.Target); }
-			public object[] Keys() { return parser.Keys(dict.Target); }
+			public object[] Keys(Inspector.Options options) { return parser.Keys(options, dict.Target); }
 			public object Get(object key) { return parser.Get(dict.Target, key); }
 			public void Set(object key, object value) { parser.Set(dict.Target, key, value); }
 			public Type ValueType() {return parser.ValueType(dict.Target);}
@@ -68,20 +68,20 @@ namespace DataInspector
 
 			DictionaryGUIState state = GetOrCreateCachedState(path, dict, parser);
 			DrawSearchInput(state, inspector.options);
-			RebuildDisplayIfNeed(state, inspector.options.listBucketSize);
+			RebuildDisplayIfNeed(state, inspector.options);
 
 			return Traversal(inspector, path, state, 0, state.display.resultKeys.Length);
 		}
 
-		private static void RebuildDisplayIfNeed(DictionaryGUIState state, int bucketSize)
+		private static void RebuildDisplayIfNeed(DictionaryGUIState state, Inspector.Options options)
 		{
 			if (state.display == null || 
-				Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state) || state.display.bucketSize != bucketSize)
+				Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state, options) || state.display.bucketSize != options.listBucketSize)
 			)
 			{
 				var display = new DictionaryDisplay();
-				display.keys = state.Keys();
-				display.bucketSize = bucketSize;
+				display.keys = state.Keys(options);
+				display.bucketSize = options.listBucketSize;
 
 				if (!string.IsNullOrEmpty(state.searchInput.text))
 					display.resultKeys = FilterKeys(display.keys, state.searchInput);
@@ -92,9 +92,9 @@ namespace DataInspector
 			}
 		}
 
-		private static bool IsKeyChanged(DictionaryGUIState state)
+		private static bool IsKeyChanged(DictionaryGUIState state, Inspector.Options options)
 		{
-			return state.display != null && !ArrayEqual(state.display.keys, state.Keys());
+			return state.display != null && !ArrayEqual(state.display.keys, state.Keys(options));
 		}
 
 		private static void DrawSearchInput(DictionaryGUIState state, Inspector.Options options)

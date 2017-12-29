@@ -37,6 +37,7 @@ public class TestClass
 	// StaticVisualizer
 	public static TestClass s_test = new TestClass();
 	public static int s_int = 20;
+	private static bool sp_bool = true;
 
 	// AtomVisualizer
 	public byte _byte = 1;

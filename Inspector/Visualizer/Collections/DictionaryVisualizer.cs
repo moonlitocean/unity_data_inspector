@@ -11,7 +11,7 @@ namespace DataInspector
 			return ((ICollection)collection).Count;
 		}
 
-		public override object[] Keys(object collection)
+		public override object[] Keys(Inspector.Options options, object collection)
 		{
 			object[] keys = new object[((IDictionary)collection).Count];
 			int index = 0;
