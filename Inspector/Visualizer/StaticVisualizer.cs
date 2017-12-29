@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace DataInspector
 {
@@ -11,7 +13,6 @@ namespace DataInspector
 		{
 			public BindingFlags flags;
 			public bool hasProperties;
-			public bool sortFields;
 
 			public string[] memberNames;
 			public Dictionary<string, MemberInfo> members;
@@ -104,12 +105,12 @@ namespace DataInspector
 			var data = cached[type];
 
 			BindingFlags flags = GetBindingFlags(options);
-			if (data.flags != flags || data.hasProperties != options.showProperties || data.sortFields != options.sortFields)
-				UpdateMembers(data, type, flags, options.showProperties, options.sortFields);
+			if (data.flags != flags || data.hasProperties != options.showProperties)
+				UpdateMembers(data, type, flags, options.showProperties);
 			return data;
 		}
 
-		private static void UpdateMembers(TypeData data, Type type, BindingFlags flags, bool showProperties, bool sortFields)
+		private static void UpdateMembers(TypeData data, Type type, BindingFlags flags, bool showProperties)
 		{
 			List<MemberInfo> members = new List<MemberInfo>();
 			members.AddRange(type.GetFields(flags));
@@ -119,12 +120,9 @@ namespace DataInspector
 			foreach (var m in members)
 				data.members[m.Name] = m;
 			data.memberNames = members.Select(o => o.Name).ToArray();
-			if(sortFields)
-				Array.Sort(data.memberNames);
 
 			data.flags = flags;
 			data.hasProperties = showProperties;
-			data.sortFields = sortFields;
 		}
 	}
 }

@@ -21,6 +21,7 @@ namespace DataInspector
 		private class DictionaryDisplay
 		{
 			public int bucketSize;
+			public bool sort;
 			public object[] keys;				// 原始key列表，用于判断Dictionary是否变化。如果不需要判断，则可以为null
 			public object[] resultKeys;			// 过滤、排序过的key，用于显示。
 		}
@@ -75,19 +76,23 @@ namespace DataInspector
 
 		private static void RebuildDisplayIfNeed(DictionaryGUIState state, Inspector.Options options)
 		{
-			if (state.display == null || 
-				Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state, options) || state.display.bucketSize != options.listBucketSize)
-			)
+			if (state.display == null ||
+			    Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state, options) ||
+			                                               state.display.bucketSize != options.listBucketSize ||
+			                                               state.display.sort != options.sortFields))
 			{
 				var display = new DictionaryDisplay();
 				display.keys = state.Keys(options);
 				display.bucketSize = options.listBucketSize;
+				display.sort = options.sortFields;
 
 				if (!string.IsNullOrEmpty(state.searchInput.text))
 					display.resultKeys = FilterKeys(display.keys, state.searchInput);
 				else
 					display.resultKeys = display.keys;
-				Sort(display.resultKeys);
+
+				if (options.sortFields)
+					display.resultKeys = Sorted(display.resultKeys);
 				state.display = display;
 			}
 		}
@@ -275,22 +280,24 @@ namespace DataInspector
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// ui key rules
-		private static void Sort(object[] keys)
+		private static object[] Sorted(object[] keys)
 		{
 			if (keys.Length == 0)
-				return;
+				return keys;
 
 			try
 			{
 				if (keys[0].GetType().IsPrimitive)
 				{
+					keys = keys.ToArray();
 					Array.Sort(keys);
-					return;
+					return keys;
 				}
 				else if (keys[0] is string)
 				{
+					keys = keys.ToArray();
 					Array.Sort(keys, StringComparer.Ordinal);
-					return;
+					return keys;
 				}
 			}
 			catch (Exception)
@@ -299,6 +306,7 @@ namespace DataInspector
 
 			var ar = keys.Select(o => o.ToString()).ToArray();
 			Array.Sort(ar, keys, StringComparer.Ordinal);
+			return ar;
 		}
 
 		private static string FormatKeyRange(object begin, object end)

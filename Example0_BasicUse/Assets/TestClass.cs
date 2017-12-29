@@ -38,6 +38,10 @@ public class TestClass
 	public static TestClass s_test = new TestClass();
 	public static int s_int = 20;
 	private static bool sp_bool = true;
+	private static int sp_prop { get; set; }
+	private static int sp_readonly_prop { get { return 10; } }
+	private static int sp_badprop { get { throw new Exception(); } }
+	private static int sp_fail_set_prop { get { return 20; } set { throw new Exception(); } }
 
 	// AtomVisualizer
 	public byte _byte = 1;
