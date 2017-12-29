@@ -217,8 +217,8 @@ namespace DataInspector
 			IMark mark = null,
 			Action<object> OnValueChanged = null)
 		{
-			if (type == null)
-				type = data != null ? data.GetType() : null;
+			if (data != null)
+				type = data.GetType();
 
 			GUITools.SetLabelWidth(options.labelWidth);
 			VisualizerBase visualizer = GetVisualizer(type, mark);
