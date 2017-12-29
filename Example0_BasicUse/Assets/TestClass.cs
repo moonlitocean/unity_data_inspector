@@ -32,6 +32,12 @@ public class TestClass
 		Carrot = 4,
 	};
 
+	public interface IBox {}
+	public class Box : IBox
+	{
+		public int type = 23;
+	}
+
 	//----------------------------------------------------
 	// Basic Visualizers
 	// StaticVisualizer
@@ -68,6 +74,10 @@ public class TestClass
 
 	// CompositeVisualizer
 	public Base _base = new Derived();
+
+	// interface
+	public IBox _ibox = new Box();
+	public IBox _iboxnull = null;
 
 	// ListVisualizer
 	// DictionaryVisualizer
