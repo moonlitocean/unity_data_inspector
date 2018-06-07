@@ -73,7 +73,32 @@ namespace DataInspector
 			return new GUILayout.HorizontalScope(style);
 		}
 
-		public static bool Foldout(bool foldout, string content)		{ return tools.Foldout(foldout, content);}
+        public static IDisposable VerticalScope()
+        {
+            return new GUILayout.VerticalScope();
+        }
+
+        public static IDisposable VerticalScope(int width)
+        {
+            return new GUILayout.VerticalScope(GUILayout.Width(width));
+        }
+
+        public static IDisposable VerticalScope(GUIStyle style)
+        {
+            return new GUILayout.VerticalScope(style);
+        }
+
+	    public static IDisposable VerticalScope(GUIStyle style, params GUILayoutOption[] options)
+	    {
+	        return new GUILayout.VerticalScope(style, options);
+	    }
+
+	    public static IDisposable Color(Color color)
+        {
+            return new GUIColor(color);
+        }
+
+        public static bool Foldout(bool foldout, string content)		{ return tools.Foldout(foldout, content);}
 		public static void LabelField(string label)						{ tools.LabelField(label);}
 		public static void LabelField(string label, string label2)		{ tools.LabelField(label, label2);}
 		public static int IntField(string label, int value)				{ return tools.IntField(label, value);}
@@ -104,5 +129,20 @@ namespace DataInspector
 				GUILayout.EndScrollView();
 			}
 		}
-	}
+
+        private class GUIColor : IDisposable
+        {
+            private Color orgColor;
+            public GUIColor(Color color)
+            {
+                orgColor = GUI.color;
+                GUI.color = color;
+            }
+
+            public void Dispose()
+            {
+                GUI.color = orgColor;
+            }
+        }
+    }
 }
