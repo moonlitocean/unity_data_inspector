@@ -39,7 +39,7 @@ namespace DataInspector
 
 			public Enum EnumMaskField(string label, Enum enumValue)
 			{
-				return EditorGUILayout.EnumMaskField(label, enumValue);
+				return EditorGUILayout.EnumFlagsField(label, enumValue);
 			}
 
 			public Enum EnumPopup(string label, Enum enumValue)
