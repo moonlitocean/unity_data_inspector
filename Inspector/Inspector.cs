@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace DataInspector
 {
 	public partial class Inspector
@@ -246,12 +247,12 @@ namespace DataInspector
 							{
 								isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo);
 							}
-							changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
+							changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark);
 						}
 					}
 					else
 					{
-						changed |= InspectRoot(name, type, ref changedData, visualizer, mark);
+						changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark);
 					}
 
 					if (changedData != null && (alwaysShowChildren || isFoldout[path]))
@@ -270,7 +271,7 @@ namespace DataInspector
 				}
 				else
 				{
-					changed |= InspectRoot(fieldinfo, type, ref changedData, visualizer, mark);
+					changed |= InspectRoot(fieldinfo, path, type, ref changedData, visualizer, mark);
 				}
 			}
 
@@ -281,12 +282,12 @@ namespace DataInspector
 			return changed;
 		}
 
-		private bool InspectRoot(string name, Type type, ref object data, VisualizerBase visualizer, IMark mark)
+		private bool InspectRoot(string name, string path, Type type, ref object data, VisualizerBase visualizer, IMark mark)
 		{
 			using (GUITools.HorizontalScope())
 			{
 				bool changed = visualizer.InspectSelf(this, name, ref data, type);
-				if (type != null && type.IsClass)
+				if (type != null && (type.IsClass || type.IsInterface))
 				{
 					if (data != null)
 					{
@@ -300,7 +301,12 @@ namespace DataInspector
 					{
 						if (GUILayout.Button("+", GUILayout.Width(20)))
 						{
-							data = CreateClassInstance(type, visualizer, mark);
+							CreateInstanceWindow.CreateInstance(path, type, visualizer, mark);
+						}
+
+						if (CreateInstanceWindow.HasResult(path))
+						{
+							data = CreateInstanceWindow.TakeResult();
 							changed = true;
 						}
 					}
@@ -309,21 +315,6 @@ namespace DataInspector
 			}
 		}
 
-		private static object CreateClassInstance(Type type, VisualizerBase visualizer, IMark mark)
-		{
-			if (visualizer.HasCustomCreator(type, mark))
-				return visualizer.CustomCreateInstance(type, mark);
-
-			try
-			{
-				return Activator.CreateInstance(type);
-			}
-			catch (Exception e)
-			{
-				Debug.Log(e);
-				return null;
-			}
-		}
 
 		// Match Order:
 		//	* IMark

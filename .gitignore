@@ -9,4 +9,7 @@ ProjectSettings
 *.csproj
 *.sln
 *.suo
-
+*.vsconfig
+.vs
+Logs/
+UserSettings/

@@ -1,0 +1,5 @@
+[*.{cpp,h,inl,hpp}]
+charset = utf-8-bom
+indent_style = tab
+indent_size = 4
+trim_trailing_whitespace = true

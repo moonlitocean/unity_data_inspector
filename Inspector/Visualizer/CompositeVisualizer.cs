@@ -14,6 +14,8 @@ namespace DataInspector
 
 		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
+			GUITools.LabelField("CompositeVisualizer");
+
 			if (data == null)
 				GUITools.LabelField("null [" + type.Name + "]");
 			else
@@ -61,8 +63,8 @@ namespace DataInspector
 		// 添加相关Fields。但是特别的是，基类的属性在派生类之前
 		private static void AppendFields(List<FieldInfo> fields, Type type, BindingFlags bindingFlags)
 		{
-		    if (type == null)
-		        return;
+			if (type == null)
+				return;
 			if (type.BaseType != typeof (object) && type != typeof (object))
 			{
 				AppendFields(fields, type.BaseType, bindingFlags);
@@ -81,14 +83,20 @@ namespace DataInspector
 			bool changed = false;
 			object changedvalue = null;
 			var mark = TypeTools.GetAttribute<IMark>(info);
+
 			if (inwritable)
+			{
 				inspector.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark);
+			}
 			else
+			{
 				inspector.Inspect(prefix + fieldInfo.Name, path + "." + fieldInfo.Name, value, valueType, mark, v =>
 				{
 					changed = true;
 					changedvalue = v;
 				});
+
+			}
 
 			if (changed)
 			{
