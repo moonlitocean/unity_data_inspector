@@ -48,7 +48,10 @@ namespace DataInspector
 				}
 				else
 				{
-					resized.SetValue(CreateInstance(elemType), i);
+					if (GetAttribute<PolymorphicInstanceAttribute>(elemType) == null)
+					{
+                        resized.SetValue(CreateInstance(elemType), i);
+                    }
 				}
 			}
 			return resized;
