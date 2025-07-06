@@ -14,8 +14,6 @@ namespace DataInspector
 
 		public override bool InspectSelf(Inspector inspector, string name, ref object data, Type type)
 		{
-			GUITools.LabelField("CompositeVisualizer");
-
 			if (data == null)
 				GUITools.LabelField("null [" + type.Name + "]");
 			else

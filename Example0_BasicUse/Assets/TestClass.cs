@@ -38,12 +38,19 @@ public class TestClass
 		public int type = 23;
 	}
 
+	public struct Struct
+	{
+		public int i;
+		public Base b;
+	}
+
 	//----------------------------------------------------
 	// Basic Visualizers
 	// StaticVisualizer
 	public static TestClass s_test = new TestClass();
 	public static int s_int = 20;
 	public static Base _s_base = new Derived();
+	public static Struct _s_struct;
 
 	private static bool sp_bool = true;
 	private static int sp_prop { get; set; }
@@ -81,13 +88,16 @@ public class TestClass
 	public IBox _ibox = new Box();
 	public IBox _iboxnull = null;
 
+	// struct
+	public Struct _struct;
+	public Struct[] _arraystruct = new Struct[2];
 
 	// ListVisualizer
 	// DictionaryVisualizer
 	// HashSetVisualizer
 	public int[] _arrayi = new int[3];
 	public List<int> _listi = new List<int>();
-	public List<Base> _listbase = new List<Base>();
+	public List<Base> _listbase = new List<Base> { new Derived(), new Base() };
 
 	public Dictionary<int, Derived> _dicti = new Dictionary<int, Derived>
 	{
