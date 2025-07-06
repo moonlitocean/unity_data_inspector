@@ -13,7 +13,7 @@ namespace DataInspector
 			object[] Keys(Inspector.Options options, object collection);
 			object Get(object dict, object key);
 			void Set(object dict, object key, object value);
-			Type ValueType(object dict);
+			Type ValueType(object dict, object key);
 			bool Resizable(object collection);						// 如果Resizable为false，则不需要实现Resize
 			object Resize(object collection, int size);				// 返回新大小的容器（可以是自己）
 		}
@@ -52,7 +52,7 @@ namespace DataInspector
 			public object[] Keys(Inspector.Options options) { return parser.Keys(options, dict.Target); }
 			public object Get(object key) { return parser.Get(dict.Target, key); }
 			public void Set(object key, object value) { parser.Set(dict.Target, key, value); }
-			public Type ValueType() {return parser.ValueType(dict.Target);}
+			public Type ValueType(object key) {return parser.ValueType(dict.Target, key);}
 			public bool Resizeable(){return parser.Resizable(dict.Target);}
 			public object Resize(int size){return parser.Resize(dict.Target, size);}
 		}
@@ -77,9 +77,9 @@ namespace DataInspector
 		private static void RebuildDisplayIfNeed(DictionaryGUIState state, Inspector.Options options)
 		{
 			if (state.display == null ||
-			    Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state, options) ||
-			                                               state.display.bucketSize != options.listBucketSize ||
-			                                               state.display.sort != options.sortFields))
+				Event.current.type == EventType.Layout && (state.searchInput.changed || IsKeyChanged(state, options) ||
+														   state.display.bucketSize != options.listBucketSize ||
+														   state.display.sort != options.sortFields))
 			{
 				var display = new DictionaryDisplay();
 				display.keys = state.Keys(options);
@@ -213,13 +213,12 @@ namespace DataInspector
 		{
 			bool changed = false;
 			var bucketSize = Math.Max(state.display.bucketSize, 2);
-			var valueType = state.ValueType();
 
 			if (end - start <= bucketSize)
 			{
 				for (int index = start; index < end; ++index)
 				{
-					changed |= InspectElement(inspector, path, state.display.resultKeys[index], state, valueType);
+					changed |= InspectElement(inspector, path, state.display.resultKeys[index], state, state.ValueType(index));
 				}
 			}
 			else

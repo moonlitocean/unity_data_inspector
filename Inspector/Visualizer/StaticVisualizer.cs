@@ -25,6 +25,16 @@ namespace DataInspector
 			return flags;
 		}
 
+		public override Type ValueType(object collection, object key)
+		{
+			MemberInfo member = GetMember(collection, key);
+			if (member is FieldInfo)
+				return ((FieldInfo)member).FieldType;
+			else if (member is PropertyInfo)
+				return ((PropertyInfo)member).PropertyType;
+			return null;
+		}
+
 		public override bool ShowSize()
 		{
 			return false;
@@ -90,6 +100,8 @@ namespace DataInspector
 				return null;
 
 			MemberInfo member;
+			if (key.GetType() == typeof(int))
+				key = data.memberNames[(int)key];
 			if (!data.members.TryGetValue((string)key, out member))
 				return null;
 

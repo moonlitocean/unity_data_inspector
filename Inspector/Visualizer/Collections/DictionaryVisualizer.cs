@@ -33,7 +33,7 @@ namespace DataInspector
 			((IDictionary)collection)[key] = value;
 		}
 
-		public override Type ValueType(object collection)
+		public override Type ValueType(object collection, object key)
 		{
 			return TypeTools.FindGenericParamType(collection.GetType(), typeof(Dictionary<,>), 1);
 		}

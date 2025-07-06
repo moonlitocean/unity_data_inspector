@@ -15,6 +15,7 @@ Inspector_tolua_extension | [tolua](https://github.com/topameng/tolua) 插件，
 # Examples
 
 对于每个范例，需要首先执行 mklink.cmd，他会引用 Inspector / Inspector_tolua_extension 代码。
+每个范例都是一个完整的 Unity 工程目录。
 
 文件夹 | 范例
 -|-

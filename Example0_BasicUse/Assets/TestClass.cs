@@ -43,6 +43,8 @@ public class TestClass
 	// StaticVisualizer
 	public static TestClass s_test = new TestClass();
 	public static int s_int = 20;
+	public static Base _s_base = new Derived();
+
 	private static bool sp_bool = true;
 	private static int sp_prop { get; set; }
 	private static int sp_readonly_prop { get { return 10; } }
@@ -79,11 +81,14 @@ public class TestClass
 	public IBox _ibox = new Box();
 	public IBox _iboxnull = null;
 
+
 	// ListVisualizer
 	// DictionaryVisualizer
 	// HashSetVisualizer
 	public int[] _arrayi = new int[3];
 	public List<int> _listi = new List<int>();
+	public List<Base> _listbase = new List<Base>();
+
 	public Dictionary<int, Derived> _dicti = new Dictionary<int, Derived>
 	{
 		{10, new Derived()},

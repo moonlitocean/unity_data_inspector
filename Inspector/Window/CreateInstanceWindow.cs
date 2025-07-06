@@ -49,7 +49,7 @@ public class CreateInstanceWindow : EditorWindow
 		}
 
 		var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
-		if (derived.Count > 0)
+		if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
 		{
 			CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
 			window.baseType = baseType;

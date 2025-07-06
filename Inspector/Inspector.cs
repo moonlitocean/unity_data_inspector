@@ -287,7 +287,7 @@ namespace DataInspector
 			using (GUITools.HorizontalScope())
 			{
 				bool changed = visualizer.InspectSelf(this, name, ref data, type);
-				if (type != null && (type.IsClass || type.IsInterface))
+				if (type != null && (type.IsClass || type.IsInterface || type == typeof(Type)))
 				{
 					if (data != null)
 					{

@@ -29,7 +29,7 @@ namespace DataInspector
 			((IList)collection)[(int)key] = value;
 		}
 
-		public override Type ValueType(object collection)
+		public override Type ValueType(object collection, object key)
 		{
 			return TypeTools.FindGenericParamType(collection.GetType(), typeof(List<>), 0);
 		}
@@ -43,7 +43,7 @@ namespace DataInspector
 		{
 			IList list = (IList)collection;
 
-			var elemType = ValueType(collection);
+			var elemType = ValueType(collection, 0);
 			while (list.Count > size)
 			{
 				list.RemoveAt(list.Count - 1);

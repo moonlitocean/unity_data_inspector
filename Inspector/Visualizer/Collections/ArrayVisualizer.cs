@@ -38,7 +38,7 @@ namespace DataInspector
 			((IList)collection)[(int)key] = value;
 		}
 
-		public override Type ValueType(object collection)
+		public override Type ValueType(object collection, object key)
 		{
 			return collection.GetType().GetElementType();
 		}

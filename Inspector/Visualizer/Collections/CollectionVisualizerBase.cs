@@ -34,8 +34,8 @@ namespace DataInspector
 
 			if (Resizable(data))
 			{
-			    var oldSize = Size(data);
-			    int size = Math.Max(0, GUITools.IntField("Size", oldSize));
+				var oldSize = Size(data);
+				int size = Math.Max(0, GUITools.IntField("Size", oldSize));
 				if (size != oldSize)
 				{
 					data = Resize(data, size);
@@ -55,7 +55,7 @@ namespace DataInspector
 		public abstract void Set(object collection, object key, object value);
 
 		// 可选功能：ValueType。若为null的话无法直接构造。
-		public virtual Type ValueType(object collection) {return null;}
+		public abstract Type ValueType(object collection, object key);
 
 		// 可选功能：Size
 		public virtual bool ShowSize() {return true;}
@@ -64,6 +64,6 @@ namespace DataInspector
 		// 可选功能：Resizable
 		public virtual bool Resizable(object collection) { return false; }					// 如果Resizable为false，则不需要实现Resize
 		public virtual object Resize(object collection, int size){return collection;}		// 返回新大小的容器（可以是自己）
-    }
+	}
 }
 
