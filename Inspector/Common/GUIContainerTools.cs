@@ -258,7 +258,8 @@ namespace DataInspector
 			string fullName = key != null ? key.ToString() : "null";
 			return inspector.Inspect(CutName(fullName), path + "." + fullName, value, valueType, null, v =>
 			{
-				state.Set(key, v);
+				if(state.Get(key) != v)
+					state.Set(key, v);
 			});
 		}
 
