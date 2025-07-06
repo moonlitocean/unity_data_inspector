@@ -203,7 +203,10 @@ namespace DataInspector
 
 			var cached = guiCache[path];
 			if (cached.dict == null || cached.dict.Target != dict)
+			{
 				cached.dict = new WeakReference(dict);
+				cached.display = null;
+			}
 			cached.parser = parser;
 			cached.lastVisit = DateTime.Now;
 			return cached;
