@@ -9,7 +9,7 @@ namespace DataInspector
 
 		public override string GetLabelPostfix(Inspector inspector, object data, Type type)
 		{
-			return " [" + TimeZone.CurrentTimeZone.StandardName + "]";
+			return " [" + TimeZoneInfo.Local.StandardName + "]";
 		}
 
 		public override bool HasChildren()

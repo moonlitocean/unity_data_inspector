@@ -49,13 +49,16 @@ namespace DataInspector
 		//------------------------------------------------------
 		// 通过实现下面的成员方法，来定义容器的行为
 
-		// 必须功能：访问和遍历
+		// 必须功能：访问、遍历，以及获得容器中元素的声明类型
 		public abstract object[] Keys(Inspector.Options options, object collection);
 		public abstract object Get(object collection, object key);
 		public abstract void Set(object collection, object key, object value);
 
-		// 可选功能：ValueType。若为null的话无法直接构造。
+		// 获得元素的声明类型。常规容器返回元素类型与key无关； Static Class 容器返回各member的类型
 		public abstract Type ValueType(object collection, object key);
+
+		// 可选功能：绘制元素的额外操作按钮。例如数组元素的移动。
+		public virtual object OnGUIDrawElemExtraButtons(object collection, object key) { return collection; }
 
 		// 可选功能：Size
 		public virtual bool ShowSize() {return true;}
