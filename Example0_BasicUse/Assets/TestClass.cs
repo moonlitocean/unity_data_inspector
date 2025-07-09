@@ -90,18 +90,23 @@ public class TestClass
 
 	// struct
 	public Struct _struct;
-	public Struct[] _arraystruct = new Struct[2];
+	public Struct[] _arraystruct = new Struct[3]
+	{
+		new() {i = 1, b = new Base()},
+		new() {i = 2, b = null},
+		new() {i = 3, b = new Derived()},
+	};
 
 	// ListVisualizer
 	// DictionaryVisualizer
 	// HashSetVisualizer
-	public int[] _arrayi = new int[3];
-	public List<int> _listi = new List<int>();
-	public List<Base> _listbase = new List<Base> { new Derived(), new Base() };
+	public int[] _arrayi = { 1, 3, 5, 7 };
+	public List<int> _listi = new() { 2, 4, 6, 8 };
+	public List<Base> _listbase = new() { new Derived(), new Base() };
 
-	public Dictionary<int, Derived> _dicti = new Dictionary<int, Derived>
+	public Dictionary<int, Base> _dictbase = new Dictionary<int, Base>
 	{
-		{10, new Derived()},
+		{10, new Base()},
 		{20, new Derived()},
 	};
 	public HashSet<int> _hashi = new HashSet<int>()

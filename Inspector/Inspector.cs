@@ -57,6 +57,22 @@ namespace DataInspector
 		// Extra init step
 		private static readonly Dictionary<string, Action<Inspector>> OnRegisterDefaultVisualizers = new Dictionary<string, Action<Inspector>>();
 
+		///////////////////////////////////////////////////////////////
+		// When you change the value under editing textbox in OnGUI, e.g. Click a "Move up" button
+		// to move array elem, move applied immediately, then comes the value change event over a
+		// wrong target.
+		// 
+		// To avoid the unexpected change, we pause value change for a whole frame.
+		// see DropFocus_SkipValueChangeOneFrame()
+		private enum SkipOneFrameStep
+		{
+			None,
+			Step0_WaitNextLayout,
+			Step1_WaitNextNonLayout,
+			Step2_WaitNextLayout,
+		}
+		private static SkipOneFrameStep skipValueChange = SkipOneFrameStep.None;
+
 		public Inspector()
 		{
 			RegisterDefaultVisualizers();
@@ -196,16 +212,18 @@ namespace DataInspector
 		public bool Inspect(string name, string path, object data,
 			Type type = null,
 			IMark mark = null,
-			Action<object> OnValueChanged = null)
+			Action<object> OnValueChanged = null,
+			Action OnGUIDrawRootButtons = null)
 		{
 			if (inInspector)
-				return InspectInternal(name, path, data, type, mark, OnValueChanged);
+				return InspectInternal(name, path, data, type, mark, OnValueChanged, OnGUIDrawRootButtons);
 
 			try
 			{
 				inInspector = true;
+				TickSkipValueChangeState();
 				GUITools.Setup();
-				return InspectInternal(name, path, data, type, mark, OnValueChanged);
+				return InspectInternal(name, path, data, type, mark, OnValueChanged, OnGUIDrawRootButtons);
 			}
 			finally
 			{
@@ -216,7 +234,8 @@ namespace DataInspector
 		public bool InspectInternal(string name, string path, object data,
 			Type type = null,
 			IMark mark = null,
-			Action<object> OnValueChanged = null)
+			Action<object> OnValueChanged = null,
+			Action OnGUIDrawRootButtons = null)
 		{
 			if (data != null)
 				type = data.GetType();
@@ -247,12 +266,12 @@ namespace DataInspector
 							{
 								isFoldout[path] = GUITools.Foldout(isFoldout.ContainsKey(path) && isFoldout[path], fieldinfo);
 							}
-							changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark);
+							changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark, OnGUIDrawRootButtons);
 						}
 					}
 					else
 					{
-						changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark);
+						changed |= InspectRoot(name, path, type, ref changedData, visualizer, mark, OnGUIDrawRootButtons);
 					}
 
 					if (changedData != null && (alwaysShowChildren || isFoldout[path]))
@@ -271,7 +290,7 @@ namespace DataInspector
 				}
 				else
 				{
-					changed |= InspectRoot(fieldinfo, path, type, ref changedData, visualizer, mark);
+					changed |= InspectRoot(fieldinfo, path, type, ref changedData, visualizer, mark, OnGUIDrawRootButtons);
 				}
 			}
 
@@ -282,33 +301,78 @@ namespace DataInspector
 			return changed;
 		}
 
-		private bool InspectRoot(string name, string path, Type type, ref object data, VisualizerBase visualizer, IMark mark)
+		public static bool IsSkipValueChangeOneFrame()
+		{
+			return skipValueChange != SkipOneFrameStep.None;
+		}
+
+		public static void DropFocus_SkipValueChangeOneFrame()
+		{
+			GUI.FocusControl(null);
+			skipValueChange = SkipOneFrameStep.Step0_WaitNextLayout;
+		}
+
+		private static void TickSkipValueChangeState()
+		{
+			switch (skipValueChange)
+			{
+				case SkipOneFrameStep.Step0_WaitNextLayout:
+					if (Event.current.type == EventType.Layout)
+						skipValueChange = SkipOneFrameStep.Step1_WaitNextNonLayout;
+					break;
+
+				case SkipOneFrameStep.Step1_WaitNextNonLayout:
+					if (Event.current.type != EventType.Layout && Event.current.type != EventType.Used)
+						skipValueChange = SkipOneFrameStep.Step2_WaitNextLayout;
+					break;
+
+				case SkipOneFrameStep.Step2_WaitNextLayout:
+					if (Event.current.type == EventType.Layout)
+						skipValueChange = SkipOneFrameStep.None;
+					break;
+			}
+		}
+
+		private bool InspectRoot(string name, string path, Type type, ref object data, VisualizerBase visualizer, IMark mark, Action OnGUIDrawRootButtons)
 		{
 			using (GUITools.HorizontalScope())
 			{
 				bool changed = visualizer.InspectSelf(this, name, ref data, type);
+				if (OnGUIDrawRootButtons != null)
+				{
+					OnGUIDrawRootButtons();
+				}
+
 				if (type != null && (type.IsClass || type.IsInterface || type == typeof(Type)))
 				{
 					if (data != null)
 					{
-						if (GUILayout.Button("-", GUILayout.Width(20)))
+						using (GUITools.Color(Color.red))
 						{
-							data = null;
-							changed = true;
+							if (GUILayout.Button("-", GUILayout.Width(20)))
+							{
+								data = null;
+								changed = true;
+							}
 						}
 					}
 					else
 					{
-						if (GUILayout.Button("+", GUILayout.Width(20)))
-						{
-							CreateInstanceWindow.CreateInstance(path, type, visualizer, mark);
-						}
+						#if UNITY_EDITOR
+							using (GUITools.Color(Color.green))
+							{
+								if (GUILayout.Button("+", GUILayout.Width(20)))
+								{
+									CreateInstanceWindow.CreateInstance(path, type, visualizer, mark);
+								}
+							}
 
-						if (CreateInstanceWindow.HasResult(path))
-						{
-							data = CreateInstanceWindow.TakeResult();
-							changed = true;
-						}
+							if (CreateInstanceWindow.HasResult(path))
+							{
+								data = CreateInstanceWindow.TakeResult();
+								changed = true;
+							}
+						#endif
 					}
 				}
 				return changed;

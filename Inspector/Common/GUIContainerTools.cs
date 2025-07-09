@@ -14,8 +14,9 @@ namespace DataInspector
 			object Get(object dict, object key);
 			void Set(object dict, object key, object value);
 			Type ValueType(object dict, object key);
-			bool Resizable(object collection);						// 如果Resizable为false，则不需要实现Resize
-			object Resize(object collection, int size);				// 返回新大小的容器（可以是自己）
+			object OnGUIDrawElemExtraButtons(object dict, object key);	// 返回dict。例如如果 dict 是一个 Array 需要修改大小，则返回新的 Array 对象
+			bool Resizable(object collection);							// 如果Resizable为false，则不需要实现Resize
+			object Resize(object collection, int size);					// 返回新大小的容器（可以是自己）
 		}
 
 		private class DictionaryDisplay
@@ -53,6 +54,7 @@ namespace DataInspector
 			public object Get(object key) { return parser.Get(dict.Target, key); }
 			public void Set(object key, object value) { parser.Set(dict.Target, key, value); }
 			public Type ValueType(object key) {return parser.ValueType(dict.Target, key);}
+			public object OnGUIDrawElemExtraButtons(object key) { return parser.OnGUIDrawElemExtraButtons(dict.Target, key); }
 			public bool Resizeable(){return parser.Resizable(dict.Target);}
 			public object Resize(int size){return parser.Resize(dict.Target, size);}
 		}
@@ -256,11 +258,20 @@ namespace DataInspector
 			object value = state.Get(key);
 			Type valueType = value != null ? value.GetType() : dictValueType;
 			string fullName = key != null ? key.ToString() : "null";
-			return inspector.Inspect(CutName(fullName), path + "." + fullName, value, valueType, null, v =>
-			{
-				if(state.Get(key) != v)
-					state.Set(key, v);
-			});
+
+			return inspector.Inspect(CutName(fullName), path + "." + fullName, value, valueType, null, 
+				v =>
+				{
+					if (state.Get(key) != v && !Inspector.IsSkipValueChangeOneFrame())
+					{
+						state.Set(key, v);
+					}
+				},
+				()=>
+				{
+					state.OnGUIDrawElemExtraButtons(key);
+				}
+			);
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////
