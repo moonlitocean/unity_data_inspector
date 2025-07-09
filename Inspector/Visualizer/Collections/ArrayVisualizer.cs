@@ -52,7 +52,7 @@ namespace DataInspector
 			int count = list.Count;
 
 			// Move Up
-			if (GUILayout.Button("\u25b2", GUILayout.Width(20)))
+			if (GUILayout.Button("\u2191", GUILayout.Width(20)))
 			{
 				if (index > 0)
 				{
@@ -62,7 +62,7 @@ namespace DataInspector
 			}
 
 			// Move Down
-			if(GUILayout.Button("\u25bc", GUILayout.Width(20)))
+			if(GUILayout.Button("\u2193", GUILayout.Width(20)))
 			{
 				if (index < count - 1)
 				{

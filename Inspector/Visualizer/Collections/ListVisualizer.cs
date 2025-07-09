@@ -22,7 +22,11 @@ namespace DataInspector
 
 		public override object Get(object collection, object key)
 		{
-			return ((IList) collection)[(int) key];
+			var list = (IList)collection;
+			int index = (int)key;
+			if(index < list.Count)
+				return ((IList) collection)[(int) key];
+			return null;
 		}
 
 		public override void Set(object collection, object key, object value)
@@ -43,7 +47,7 @@ namespace DataInspector
 			int count = list.Count;
 
 			// Move Up
-			if (GUILayout.Button("\u25b2", GUILayout.Width(20)))
+			if (GUILayout.Button("\u2191", GUILayout.Width(20)))
 			{
 				if (index > 0)
 				{
@@ -53,7 +57,7 @@ namespace DataInspector
 			}
 
 			// Move Down
-			if (GUILayout.Button("\u25bc", GUILayout.Width(20)))
+			if (GUILayout.Button("\u2193", GUILayout.Width(20)))
 			{
 				if (index < count - 1)
 				{
@@ -65,27 +69,28 @@ namespace DataInspector
 			using (GUITools.Color(Color.green))
 			{
 				// Insert Up
-				if (GUILayout.Button("\u25b2+", GUILayout.Width(30)))
+				if (GUILayout.Button("\u2191+", GUILayout.Width(23)))
 				{
 					Inspector.DropFocus_SkipValueChangeOneFrame();
 					list.Insert(index, TypeTools.CreateDefaultInstance(ValueType(collection, key)));
 				}
 
 				// Insert Down
-				if (GUILayout.Button("\u25bc+", GUILayout.Width(30)))
+				if (GUILayout.Button("\u2193+", GUILayout.Width(23)))
 				{
 					Inspector.DropFocus_SkipValueChangeOneFrame();
 					list.Insert(index + 1, TypeTools.CreateDefaultInstance(ValueType(collection, key)));
 				}
 			}
 
-			//using (GUITools.Color(Color.red))
-			//{
-			//	if (GUILayout.Button("x", GUILayout.Width(20)))
-			//	{
-			//		list.RemoveAt(index);
-			//	}
-			//}
+			using (GUITools.Color(Color.red))
+			{
+				if (GUILayout.Button("x", GUILayout.Width(20)))
+				{
+					Inspector.DropFocus_SkipValueChangeOneFrame();
+					list.RemoveAt(index);
+				}
+			}
 
 			return collection;
 		}
