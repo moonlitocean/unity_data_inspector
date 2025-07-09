@@ -50,29 +50,20 @@ public class CreateInstanceWindow : EditorWindow
 			return;
 		}
 
-        if (TypeTools.GetAttribute<PolymorphicInstanceAttribute>(baseType) != null)
+		var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
+		if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
 		{
-            var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
-            if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
-            {
-                CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
-                window.baseType = baseType;
-                window.derivedTypes = derived;
-                window.position = new Rect(GUIUtility.GUIToScreenPoint(Event.current.mousePosition), new Vector2(400, 200));
-                window.ShowAuxWindow();
-                return;
-            }
-        }
+			CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
+			window.baseType = baseType;
+			window.derivedTypes = derived;
+			window.position = new Rect(GUIUtility.GUIToScreenPoint(Event.current.mousePosition), new Vector2(400, 200));
+			window.ShowAuxWindow();
+			return;
+		}
 
-		try
-		{
-			hasResult = true;
+		hasResult = true;
+		if(TypeTools.CanCreateInstance(baseType))
 			result = Activator.CreateInstance(baseType);
-		}
-		catch (Exception e)
-		{
-			Debug.Log(e);
-		}
 	}
 
 

@@ -96,6 +96,7 @@ public class TestClass
 		new() {i = 2, b = null},
 		new() {i = 3, b = new Derived()},
 	};
+	public IBox[] _arrayinterface = new IBox[2];
 
 	// ListVisualizer
 	// DictionaryVisualizer

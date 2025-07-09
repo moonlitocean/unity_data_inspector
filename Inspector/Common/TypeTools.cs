@@ -7,6 +7,8 @@ namespace DataInspector
 {
 	internal static class TypeTools
 	{
+		private static Dictionary<Type, bool> HasDefaultConstructor = new Dictionary<Type, bool>();
+
 		//////////////////////////////////////////////////////////////////
 		// 主要用于找到容器的元素类型
 		public static Type FindGenericParamType(Type type, Type generic, int paramIndex)
@@ -46,12 +48,9 @@ namespace DataInspector
 				{
 					resized.SetValue(array.GetValue(i), i);
 				}
-				else
+				else if(CanCreateInstance(elemType))
 				{
-					if (GetAttribute<PolymorphicInstanceAttribute>(elemType) == null)
-					{
-                        resized.SetValue(CreateInstance(elemType), i);
-                    }
+					resized.SetValue(CreateInstance(elemType), i);
 				}
 			}
 			return resized;
@@ -66,6 +65,24 @@ namespace DataInspector
 			catch (Exception)
 			{
 			}
+		}
+
+		public static bool CanCreateInstance(Type type)
+		{
+			if (!HasDefaultConstructor.TryGetValue(type, out bool canCreate))
+			{
+				if(type == typeof(string))
+					canCreate = true;
+				else if(!type.IsInterface && !type.IsAbstract &&
+					type.GetConstructor(Type.EmptyTypes) != null)
+					canCreate = true;
+				else
+					canCreate = false;
+
+				HasDefaultConstructor[type] = canCreate;
+			}
+
+			return canCreate;
 		}
 
 		public static object CreateInstance(Type type)
