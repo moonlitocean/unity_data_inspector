@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using UnityEngine;
 
@@ -71,7 +71,7 @@ namespace DataInspector
 				}
 			}
 
-			// ÔİÊ±²»Ö§³Ö
+			// æš‚æ—¶ä¸æ”¯æŒ
 			//using (GUITools.Color(Color.green))
 			//{
 			//	// Insert Up

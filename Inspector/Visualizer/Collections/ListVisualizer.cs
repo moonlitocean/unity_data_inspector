@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace DataInspector
 {
@@ -32,6 +33,61 @@ namespace DataInspector
 		public override Type ValueType(object collection, object key)
 		{
 			return TypeTools.FindGenericParamType(collection.GetType(), typeof(List<>), 0);
+		}
+
+		public override object OnGUIDrawElemExtraButtons(object collection, object key)
+		{
+			EventType type = Event.current.type;
+			IList list = (IList)collection;
+			int index = (int)key;
+			int count = list.Count;
+
+			// Move Up
+			if (GUILayout.Button("\u25b2", GUILayout.Width(20)))
+			{
+				if (index > 0)
+				{
+					Inspector.DropFocus_SkipValueChangeOneFrame();
+					(list[index], list[index - 1]) = (list[index - 1], list[index]);
+				}
+			}
+
+			// Move Down
+			if (GUILayout.Button("\u25bc", GUILayout.Width(20)))
+			{
+				if (index < count - 1)
+				{
+					Inspector.DropFocus_SkipValueChangeOneFrame();
+					(list[index], list[index + 1]) = (list[index + 1], list[index]);
+				}
+			}
+
+			using (GUITools.Color(Color.green))
+			{
+				// Insert Up
+				if (GUILayout.Button("\u25b2+", GUILayout.Width(30)))
+				{
+					Inspector.DropFocus_SkipValueChangeOneFrame();
+					list.Insert(index, TypeTools.CreateDefaultInstance(ValueType(collection, key)));
+				}
+
+				// Insert Down
+				if (GUILayout.Button("\u25bc+", GUILayout.Width(30)))
+				{
+					Inspector.DropFocus_SkipValueChangeOneFrame();
+					list.Insert(index + 1, TypeTools.CreateDefaultInstance(ValueType(collection, key)));
+				}
+			}
+
+			//using (GUITools.Color(Color.red))
+			//{
+			//	if (GUILayout.Button("x", GUILayout.Width(20)))
+			//	{
+			//		list.RemoveAt(index);
+			//	}
+			//}
+
+			return collection;
 		}
 
 		public override bool Resizable(object collection)
