@@ -50,16 +50,19 @@ public class CreateInstanceWindow : EditorWindow
 			return;
 		}
 
-		var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
-		if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
+        if (TypeTools.GetAttribute<PolymorphicInstanceAttribute>(baseType) != null)
 		{
-			CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
-			window.baseType = baseType;
-			window.derivedTypes = derived;
-			window.position = new Rect(GUIUtility.GUIToScreenPoint(Event.current.mousePosition), new Vector2(400, 200));
-			window.ShowAuxWindow();
-			return;
-		}
+            var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
+            if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
+            {
+                CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
+                window.baseType = baseType;
+                window.derivedTypes = derived;
+                window.position = new Rect(GUIUtility.GUIToScreenPoint(Event.current.mousePosition), new Vector2(400, 200));
+                window.ShowAuxWindow();
+                return;
+            }
+        }
 
 		try
 		{
