@@ -73,32 +73,37 @@ namespace DataInspector
 			return new GUILayout.HorizontalScope(style);
 		}
 
-        public static IDisposable VerticalScope()
-        {
-            return new GUILayout.VerticalScope();
-        }
+		public static IDisposable VerticalScope()
+		{
+			return new GUILayout.VerticalScope();
+		}
 
-        public static IDisposable VerticalScope(int width)
-        {
-            return new GUILayout.VerticalScope(GUILayout.Width(width));
-        }
+		public static IDisposable VerticalScope(int width)
+		{
+			return new GUILayout.VerticalScope(GUILayout.Width(width));
+		}
 
-        public static IDisposable VerticalScope(GUIStyle style)
-        {
-            return new GUILayout.VerticalScope(style);
-        }
+		public static IDisposable VerticalScope(GUIStyle style)
+		{
+			return new GUILayout.VerticalScope(style);
+		}
 
-	    public static IDisposable VerticalScope(GUIStyle style, params GUILayoutOption[] options)
-	    {
-	        return new GUILayout.VerticalScope(style, options);
-	    }
+		public static IDisposable VerticalScope(GUIStyle style, params GUILayoutOption[] options)
+		{
+			return new GUILayout.VerticalScope(style, options);
+		}
 
-	    public static IDisposable Color(Color color)
-        {
-            return new GUIColor(color);
-        }
+		public static IDisposable Color(Color color)
+		{
+			return new GUIColor(color);
+		}
 
-        public static bool Foldout(bool foldout, string content)		{ return tools.Foldout(foldout, content);}
+		public static IDisposable Enabled(bool enabled)
+		{
+			return new GUIEnabled(enabled);
+		}
+
+		public static bool Foldout(bool foldout, string content)		{ return tools.Foldout(foldout, content);}
 		public static void LabelField(string label)						{ tools.LabelField(label);}
 		public static void LabelField(string label, string label2)		{ tools.LabelField(label, label2);}
 		public static int IntField(string label, int value)				{ return tools.IntField(label, value);}
@@ -116,7 +121,7 @@ namespace DataInspector
 		public static IDisposable Indent()								{ return tools.Indent();}
 
 		//////////////////////////////////////////////////////////////////////////////////////
-		// 
+		//
 		private class GUIScroll : IDisposable
 		{
 			public GUIScroll(ref Vector2 scroll)
@@ -130,19 +135,34 @@ namespace DataInspector
 			}
 		}
 
-        private class GUIColor : IDisposable
-        {
-            private Color orgColor;
-            public GUIColor(Color color)
-            {
-                orgColor = GUI.color;
-                GUI.color = color;
-            }
+		private class GUIColor : IDisposable
+		{
+			private Color orgColor;
+			public GUIColor(Color color)
+			{
+				orgColor = GUI.color;
+				GUI.color = color;
+			}
 
-            public void Dispose()
-            {
-                GUI.color = orgColor;
-            }
-        }
-    }
+			public void Dispose()
+			{
+				GUI.color = orgColor;
+			}
+		}
+
+		private class GUIEnabled: IDisposable
+		{
+			private bool orgEnable;
+			public GUIEnabled(bool enabled)
+			{
+				orgEnable = GUI.enabled;
+				GUI.enabled = enabled;
+			}
+
+			public void Dispose()
+			{
+				GUI.enabled = orgEnable;
+			}
+		}
+	}
 }

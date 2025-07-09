@@ -53,7 +53,7 @@ namespace DataInspector
 				if (elemType.IsClass)
 					list.Add(null);
 				else
-					list.Add(TypeTools.CreateInstance(elemType));
+					list.Add(TypeTools.CreateDefaultInstance(elemType));
 			}
 			return list;
 		}

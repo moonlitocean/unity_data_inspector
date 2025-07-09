@@ -359,7 +359,9 @@ namespace DataInspector
 					else
 					{
 						#if UNITY_EDITOR
-							using (GUITools.Color(Color.green))
+							bool enabled = TypeTools.HasDerivedCreateDefaultInstance(type);
+							using (GUITools.Enabled(enabled))
+							using (GUITools.Color(enabled? Color.green : Color.gray))
 							{
 								if (GUILayout.Button("+", GUILayout.Width(20)))
 								{

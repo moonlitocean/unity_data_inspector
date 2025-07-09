@@ -78,14 +78,14 @@ namespace DataInspector
 			//	if (GUILayout.Button("\u25b2+", GUILayout.Width(30)))
 			//	{
 			//		Inspector.DropFocus_SkipValueChangeOneFrame();
-			//		list.Insert(index, Activator.CreateInstance(collection.GetType().GetElementType()));
+			//		list.Insert(index, Activator.CreateDefaultInstance(collection.GetType().GetElementType()));
 			//	}
 
 			//	// Insert Down
 			//	if (GUILayout.Button("\u25bc+", GUILayout.Width(30)))
 			//	{
 			//		Inspector.DropFocus_SkipValueChangeOneFrame();
-			//		list.Insert(index+1, Activator.CreateInstance(collection.GetType().GetElementType()));
+			//		list.Insert(index+1, Activator.CreateDefaultInstance(collection.GetType().GetElementType()));
 			//	}
 			//}
 

@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+ï»¿#if UNITY_EDITOR
 
 using System;
 using System.Collections.Generic;
@@ -50,7 +50,7 @@ public class CreateInstanceWindow : EditorWindow
 			return;
 		}
 
-		var derived = TypeTools.GetDerivedTypeWithDefaultCtor(baseType);
+		var derived = TypeTools.GetDerivedDefaultInstanceTypes(baseType);
 		if (derived.Count > 1 || derived.Count == 1 && derived[0] != baseType)
 		{
 			CreateInstanceWindow window = CreateInstanceWindow.CreateInstance<CreateInstanceWindow>();
@@ -62,12 +62,11 @@ public class CreateInstanceWindow : EditorWindow
 		}
 
 		hasResult = true;
-		if(TypeTools.CanCreateInstance(baseType))
+		if(TypeTools.CanCreateDefaultInstance(baseType))
 			result = Activator.CreateInstance(baseType);
 	}
 
-
-	// »æÖÆµ¯´°µÄGUI
+	// ç»˜åˆ¶å¼¹çª—çš„GUI
 	void OnGUI()
 	{
 		if (baseType == null || derivedTypes == null)

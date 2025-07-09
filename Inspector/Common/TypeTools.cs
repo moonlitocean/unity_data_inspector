@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace DataInspector
 {
 	internal static class TypeTools
 	{
-		private static Dictionary<Type, bool> HasDefaultConstructor = new Dictionary<Type, bool>();
+		private static Dictionary<Type, bool> HasDefaultCtor = new();					// 自身是否有默认构造函数
+		private static Dictionary<Type, List<Type>> AssignableDefaultCtorTypes = new();	// 自身及派生类中所有含默认构造函数类
 
 		//////////////////////////////////////////////////////////////////
 		// 主要用于找到容器的元素类型
@@ -48,9 +50,9 @@ namespace DataInspector
 				{
 					resized.SetValue(array.GetValue(i), i);
 				}
-				else if(CanCreateInstance(elemType))
+				else if(CanCreateDefaultInstance(elemType))
 				{
-					resized.SetValue(CreateInstance(elemType), i);
+					resized.SetValue(CreateDefaultInstance(elemType), i);
 				}
 			}
 			return resized;
@@ -67,30 +69,79 @@ namespace DataInspector
 			}
 		}
 
-		public static bool CanCreateInstance(Type type)
+		// 自身是否可以直接创建 Instance（例如存在默认构造函数）
+		// 如果返回 true，则可以用 CreateDefaultInstance() 直接创建 Instance
+		//
+		// 这里有特殊白名单，如 string
+		// 特殊黑名单，如 GameObject  (默认构造函数会在场景上新建一个 New GameObject)
+		public static bool CanCreateDefaultInstance(Type type)
 		{
-			if (!HasDefaultConstructor.TryGetValue(type, out bool canCreate))
+			if (!HasDefaultCtor.TryGetValue(type, out bool canCreate))
 			{
 				if(type == typeof(string))
 					canCreate = true;
-				else if(!type.IsInterface && !type.IsAbstract &&
+				else if (type == typeof(GameObject))
+					canCreate = false;
+				else if (!type.IsInterface && !type.IsAbstract &&
 					type.GetConstructor(Type.EmptyTypes) != null)
 					canCreate = true;
 				else
 					canCreate = false;
 
-				HasDefaultConstructor[type] = canCreate;
+				HasDefaultCtor[type] = canCreate;
 			}
 
 			return canCreate;
 		}
 
-		public static object CreateInstance(Type type)
+		public static object CreateDefaultInstance(Type type)
 		{
 			if (type == typeof(string))
 				return "";
 			else
 				return Activator.CreateInstance(type);
+		}
+
+		// 自身或自己的派生类，是否存在至少一个类有默认构造函数
+		public static bool HasDerivedCreateDefaultInstance(Type type)
+		{
+			if (!AssignableDefaultCtorTypes.TryGetValue(type, out var list))
+			{
+				list = GetDerivedDefaultInstanceTypes(type);
+			}
+			
+			return list.Count > 0;
+		}
+
+		public static List<Type> GetDerivedDefaultInstanceTypes(Type baseType)
+		{
+			if (!AssignableDefaultCtorTypes.TryGetValue(baseType, out var list))
+			{
+				list = new List<Type>();
+				Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+				foreach (Assembly assembly in assemblies)
+				{
+					try
+					{
+						Type[] types = assembly.GetTypes();
+						foreach (Type type in types)
+						{
+							if (baseType.IsAssignableFrom(type) && CanCreateDefaultInstance(type))
+							{
+								list.Add(type);
+							}
+						}
+					}
+					catch (ReflectionTypeLoadException)
+					{
+						// ignore Load Exception 
+					}
+				}
+
+				AssignableDefaultCtorTypes[baseType] = list;
+			}
+
+			return list;
 		}
 
 		public static T GetAttribute<T>(MemberInfo info)
@@ -123,34 +174,6 @@ namespace DataInspector
 				return (T)method.Invoke(obj, null);
 			}
 			return default(T);
-		}
-
-		public static List<Type> GetDerivedTypeWithDefaultCtor(Type baseType)
-		{
-			var derived = new List<Type>();
-
-			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-			foreach (Assembly assembly in assemblies)
-			{
-				try
-				{
-					Type[] types = assembly.GetTypes();
-					foreach (Type type in types)
-					{
-						if (baseType.IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract &&
-							type.GetConstructor(Type.EmptyTypes) != null)
-						{
-							derived.Add(type);
-						}
-					}
-				}
-				catch (ReflectionTypeLoadException)
-				{
-					// ignore Load Exception 
-				}
-			}
-
-			return derived;
 		}
 	}
 }
